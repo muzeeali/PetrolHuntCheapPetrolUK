@@ -1,0 +1,42 @@
+# Built application packages and binaries
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# Gradle build cache & output directories
+.gradle/
+build/
+/*/build/
+
+# Local device & SDK configuration
+local.properties
+
+# Log files
+*.log
+
+# Keystores & signing keys
+*.jks
+*.keystore
+
+# Android Studio / IntelliJ IDEA
+*.iml
+.idea/
+.idea/caches/
+.idea/libraries/
+.idea/modules.xml
+.idea/workspace.xml
+.idea/navEditor.xml
+.idea/assetWizardSettings.xml
+
+# Captures and profiling
+captures/
+.navigation/
+
+# Native builds
+.externalNativeBuild/
+.cxx/
+
+# OS-specific files
+.DS_Store
+Thumbs.db

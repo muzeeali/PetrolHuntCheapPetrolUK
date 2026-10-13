@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_stack" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "feedback-success": "#35E879", "primary-fixed": "#64ff92", "outline": "#859585", "background": "#111317", "surface-container-high": "#282a2e", "surface": "#171A20", "tertiary-fixed": "#ffdcbd", "on-primary-container": "#00632d", "price-average": "#FFC857", "on-secondary-fixed-variant": "#005225", "on-secondary-fixed": "#00210b", "on-tertiary-fixed": "#2c1600", "tertiary": "#ffe3cb", "surface-dim": "#111317", "error-container": "#93000a", "surface-variant": "#333539", "on-secondary-container": "#003716", "inverse-surface": "#e2e2e8", "text-muted": "#6F7887", "primary": "#8fffa8", "tertiary-container": "#ffbf7f", "primary-container": "#35e879", "on-tertiary-container": "#794b16", "on-surface": "#e2e2e8", "price-cheap": "#35E879", "secondary": "#55e080", "inverse-primary": "#006d32", "on-tertiary-fixed-variant": "#673d06", "text-secondary": "#9AA3B2", "error": "#ffb4ab", "surface-elevated": "#1E222A", "inverse-on-surface": "#2f3035", "outline-variant": "#3c4a3d", "surface-container-highest": "#333539", "tertiary-fixed-dim": "#f9ba7a", "on-primary-fixed": "#00210b", "on-primary-fixed-variant": "#005224", "surface-bright": "#37393e", "surface-tint": "#2ce375", "on-secondary": "#003917", "surface-container-low": "#1a1c20", "text-primary": "#FFFFFF", "border": "#292E38", "secondary-container": "#00ad54", "surface-container": "#1e2024", "brand-green": "#35E879", "on-background": "#e2e2e8", "on-error-container": "#ffdad6", "on-primary": "#003917", "on-tertiary": "#4a2800", "price-expensive": "#FF5C5C", "secondary-fixed": "#74fd9a", "on-error": "#690005", "feedback-error": "#FF5C5C", "primary-fixed-dim": "#2ce375", "dark-green": "#20B85E", "secondary-fixed-dim": "#55e080", "on-surface-variant": "#bbcbb9", "surface-container-lowest": "#0c0e12" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-md": "0.75rem", "space-lg": "1rem", "gutter": "1rem", "margin": "1rem", "space-sm": "0.5rem", "space-xs": "0.25rem", "space-xl": "1.5rem" }, "fontFamily": { "label-md": ["Inter"], "headline-lg": ["Inter"], "label-sm": ["Inter"], "price-hero": ["Inter"], "display-lg": ["Inter"], "label-lg": ["Inter"], "headline-md": ["Inter"], "body-sm": ["Inter"], "body-md": ["Inter"], "body-lg": ["Inter"], "headline-sm": ["Inter"] }, "fontSize": { "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }], "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "label-sm": ["10px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600" }], "price-hero": ["28px", { "lineHeight": "34px", "letterSpacing": "-0.03em", "fontWeight": "700" }], "display-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }], "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }], "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }], "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }], "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }] } } } };</script><style>@layer base{html,body{width:100%;margin:0;padding:0;background-color:#111317;color:#e2e2e8;font-family:'Inter',sans-serif;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-background font-body-md text-on-surface flex flex-col min-h-screen"><header class="fixed top-0 inset-x-0 z-50 bg-surface/85 backdrop-blur-xl pt-safe shadow-[0_1px_8px_rgba(0,0,0,0.45)]"><div class="h-16 px-gutter flex items-center justify-between"><div class="flex items-center gap-space-sm"><button aria-label="Go back" class="w-11 h-11 flex items-center justify-center text-text-primary hover:text-brand-green transition-colors -ml-2 rounded-lg" onclick="history.back()"><span class="material-symbols-outlined text-[24px]">arrow_back</span></button><img alt="Petrol Hunt Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDdT6uPQw1dRNDWZtJ8BL9o9jpItE3YgAkIyvDQxRhQWtoAuIL0eDVYuKQj-hsWV8lnINNXZxok_CO2f71BfYRd8XJyq18zs5OTp6qS7uRdfocFoSmOrjrUCn0EyTU8_dKn85kmWts7HNa1aLRyzQ_inx-qgIfLIWMVqE3DE-MFKW9IGlguymHX6pyhmxGZuLoOFC-oQKPBM47y7uEpVqJFg-mwRd3UkLzlP5BdFun2Zk0Iw5jUQiA"/><h1 class="font-headline-sm text-headline-sm text-text-primary tracking-tight truncate max-w-[180px]">Station Details</h1></div><div class="flex items-center gap-space-sm"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 bg-background min-h-screen"><div class="flex flex-col w-full pb-safe">
+<!-- Station Header Meta Strip -->
+<div class="px-gutter pt-space-md pb-space-xs flex items-center justify-between">
+<div class="flex items-center gap-space-sm min-w-0">
+<span class="px-2 py-0.5 rounded-full bg-surface-container-highest text-primary font-label-sm text-label-sm tracking-wider uppercase">ASDA</span>
+<span class="text-text-muted font-body-sm text-body-sm flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-brand-green"></span>
+        Verified Pump
+      </span>
+</div>
+<div class="flex items-center gap-space-xs">
+<button aria-label="Favorite station" class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-text-secondary active:scale-95 transition-transform" id="favorite-btn">
+<span class="material-symbols-outlined text-[20px]" id="fav-icon">favorite_border</span>
+</button>
+<button aria-label="Share station" class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-text-secondary active:scale-95 transition-transform" id="share-btn">
+<span class="material-symbols-outlined text-[20px]">share</span>
+</button>
+</div>
+</div>
+<div class="px-gutter mb-space-md">
+<div class="flex items-baseline justify-between gap-2">
+<h2 class="font-headline-lg text-headline-lg text-text-primary tracking-tight">Asda Clapham Superstore</h2>
+</div>
+<p class="font-body-sm text-body-sm text-text-secondary mt-0.5">Clapham Junction • London SW11</p>
+</div>
+<!-- Hero Price Card (Level 2 Elevation) -->
+<div class="px-gutter mb-space-lg">
+<div class="relative overflow-hidden rounded-xl bg-surface-elevated p-space-lg shadow-xl">
+<!-- Glow effect backdrop -->
+<div class="absolute -right-10 -top-10 w-44 h-44 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
+<div class="relative z-10 flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high text-brand-green font-label-md text-label-md">
+<span class="material-symbols-outlined text-[16px]">local_gas_station</span>
+<span>E10 Petrol</span>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-brand-green/15 text-brand-green font-label-sm text-label-sm uppercase tracking-wide">
+            Best in Area
+          </span>
+</div>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-price-hero text-display-lg text-brand-green tracking-tight font-headline-lg">138.9</span>
+<span class="font-headline-sm text-headline-sm text-brand-green">p/L</span>
+<span class="ml-auto font-label-md text-label-md text-text-muted line-through">144.2p avg</span>
+</div>
+<div class="flex items-center gap-1.5 text-on-surface">
+<span class="material-symbols-outlined text-brand-green text-[18px]">verified</span>
+<p class="font-body-sm text-body-sm font-label-md text-text-primary">Lowest price within your 5 mi search radius</p>
+</div>
+<!-- Metric micro-callout -->
+<div class="pt-space-sm flex items-center justify-between text-text-muted bg-surface-container/60 rounded-lg p-2.5">
+<div class="flex items-center gap-1.5 font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px] text-text-secondary">schedule</span>
+<span>Updated 2h ago</span>
+</div>
+<span class="font-label-sm text-label-sm text-text-secondary truncate max-w-[170px]">Source: CheckFuelPrices.co.uk</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Visual Station Photo Snippet -->
+<div class="px-gutter mb-space-lg">
+<div class="relative h-28 w-full rounded-xl overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Modern illuminated ASDA supermarket forecourt petrol station in London Clapham at dusk, glowing green digital fuel price canopy lights reflecting on damp tarmac asphalt, sleek night automotive photography, deep muted dark tones with bright green neon accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBeu-RYzLR1zxwv-O9rjhGGw3t7hUje3y70GcfJuQU6RI-1m3htgtTdD7T4RZTBG8I_Le9cJNQu6pI3rXj73KkoabW3ONHV2izD7NoTrVk2dAvMUw9xBIKp9jSTVyJ4-w4g4vL0hxQ4fDUDIIx3u4XV601-F0mM3ctKeuo_4Ct3msLyudFl6IIOJv57mnNBi1JSYUnh_yDNO8tJXjgOjO2GYQ-ofnMsDhpnlS0rGQ5ec4-zM6mD0U0"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-dim via-transparent to-transparent"></div>
+<div class="absolute bottom-2 left-3 right-3 flex items-center justify-between text-text-primary">
+<span class="font-label-sm text-label-sm bg-surface-dim/80 backdrop-blur px-2 py-1 rounded-md">8 Modern Automated Pumps</span>
+<span class="font-label-sm text-label-sm bg-surface-dim/80 backdrop-blur px-2 py-1 rounded-md text-brand-green font-label-md">Pay at Pump Active</span>
+</div>
+</div>
+</div>
+<!-- All Available Fuel Grades Card -->
+<div class="px-gutter mb-space-lg">
+<div class="rounded-xl bg-surface p-space-lg shadow-md">
+<div class="flex items-center justify-between mb-space-md">
+<h3 class="font-headline-sm text-headline-sm text-text-primary">All Fuel Grades</h3>
+<span class="font-label-sm text-label-sm text-text-muted">Live UK Feed</span>
+</div>
+<div class="flex flex-col gap-space-sm">
+<!-- Grade 1: E10 -->
+<div class="flex items-center justify-between p-space-md rounded-lg bg-surface-container-high transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-brand-green/20 flex items-center justify-center text-brand-green">
+<span class="material-symbols-outlined text-[20px]">local_gas_station</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-label-lg text-label-lg text-text-primary">E10 Unleaded</span>
+<span class="px-1.5 py-0.5 rounded bg-brand-green/20 text-brand-green font-label-sm text-label-sm font-label-md">Cheapest</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-muted">Standard unleaded petrol</p>
+</div>
+</div>
+<div class="text-right">
+<span class="font-headline-sm text-headline-sm text-brand-green">138.9<span class="text-body-sm">p</span></span>
+</div>
+</div>
+<!-- Grade 2: E5 -->
+<div class="flex items-center justify-between p-space-md rounded-lg bg-surface-container transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-price-average/20 flex items-center justify-center text-price-average">
+<span class="material-symbols-outlined text-[20px]">speed</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-label-lg text-label-lg text-text-primary">E5 Premium</span>
+<span class="px-1.5 py-0.5 rounded bg-price-average/20 text-price-average font-label-sm text-label-sm">Average</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-muted">Super unleaded high octane</p>
+</div>
+</div>
+<div class="text-right">
+<span class="font-headline-sm text-headline-sm text-text-primary">146.9<span class="text-body-sm text-text-secondary">p</span></span>
+</div>
+</div>
+<!-- Grade 3: B7 -->
+<div class="flex items-center justify-between p-space-md rounded-lg bg-surface-container transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-price-average/20 flex items-center justify-center text-price-average">
+<span class="material-symbols-outlined text-[20px]">oil_barrel</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-label-lg text-label-lg text-text-primary">B7 Diesel</span>
+<span class="px-1.5 py-0.5 rounded bg-price-average/20 text-price-average font-label-sm text-label-sm">Average</span>
+</div>
+<p class="font-body-sm text-body-sm text-text-muted">Standard automotive diesel</p>
+</div>
+</div>
+<div class="text-right">
+<span class="font-headline-sm text-headline-sm text-text-primary">144.9<span class="text-body-sm text-text-secondary">p</span></span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Station Facilities & Details -->
+<div class="px-gutter mb-space-lg">
+<div class="rounded-xl bg-surface p-space-lg shadow-md flex flex-col gap-space-md">
+<h3 class="font-headline-sm text-headline-sm text-text-primary">Station Information</h3>
+<!-- Location row -->
+<div class="flex items-start justify-between gap-space-md">
+<div class="flex items-start gap-3 min-w-0">
+<div class="w-8 h-8 rounded-full bg-surface-container flex-shrink-0 flex items-center justify-center text-text-secondary mt-0.5">
+<span class="material-symbols-outlined text-[18px]">pin_drop</span>
+</div>
+<div class="min-w-0">
+<p class="font-body-md text-body-md text-text-primary leading-snug" id="station-address">204 Lavender Hill, Clapham Junction, London SW11 1JG</p>
+<p class="font-body-sm text-body-sm text-brand-green mt-0.5">1.2 miles away • approx. 5 mins drive</p>
+</div>
+</div>
+<button aria-label="Copy address" class="p-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-text-secondary active:scale-95 transition-all flex-shrink-0" id="copy-btn">
+<span class="material-symbols-outlined text-[18px]" id="copy-icon">content_copy</span>
+</button>
+</div>
+<!-- Hours row -->
+<div class="flex items-center gap-3 pt-space-xs">
+<div class="w-8 h-8 rounded-full bg-surface-container flex-shrink-0 flex items-center justify-center text-text-secondary">
+<span class="material-symbols-outlined text-[18px]">timelapse</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-body-md text-body-md text-text-primary">Open 24 hours</span>
+<span class="w-1.5 h-1.5 rounded-full bg-brand-green"></span>
+<span class="font-label-sm text-label-sm text-brand-green">Forecourt Open Now</span>
+</div>
+</div>
+<!-- Forecourt amenities pills -->
+<div class="pt-space-xs flex flex-wrap gap-2">
+<div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container text-text-secondary font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[15px]">air</span>
+          Air &amp; Water
+        </div>
+<div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container text-text-secondary font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[15px]">local_convenience_store</span>
+          Asda Superstore
+        </div>
+<div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container text-text-secondary font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[15px]">contactless</span>
+          Contactless Pay
+        </div>
+<div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container text-text-secondary font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[15px]">wc</span>
+          Customer Toilets
+        </div>
+</div>
+</div>
+</div>
+<!-- Map Context Snippet -->
+<div class="px-gutter mb-space-xl">
+<div class="relative rounded-xl overflow-hidden shadow-lg h-36">
+<div class="w-full h-full bg-cover bg-center" data-location="204 Lavender Hill, Clapham Junction, London SW11 1JG" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBc6HdzB2X5yrohdo1obfOPRD6l1KzWZmivJli-UZOdpawcxnRT9gDSZ83qVIzGyuWDAGbMYFPVHCp0R_j-ksACt6tjCinY3RXR2To9ET4PSFKXS2kLJF-T_AjL_TkWm4bNGLagR1F_yq6S1gY-ATJhgKWqnYtFFemk4sFRn7y_Ro-VY0ixAkhyaSXC10RpQiJLz4Ev_JIMDtQl2UVrKmyxq3SZXvvGrEvfBAOin5L4TRGloiTxb3k')"></div>
+<div class="absolute inset-0 bg-surface-dim/40 backdrop-blur-[1px]"></div>
+<div class="absolute bottom-3 left-3 right-3 flex items-center justify-between">
+<div class="bg-surface-elevated/95 px-3 py-1.5 rounded-lg shadow-md flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-brand-green animate-pulse"></span>
+<span class="font-label-md text-label-md text-text-primary">Traffic: Light along A3036</span>
+</div>
+<button class="bg-surface-container hover:bg-surface-container-high px-3 py-1.5 rounded-lg font-label-sm text-label-sm text-text-primary shadow flex items-center gap-1 active:scale-95 transition-transform" id="preview-map-btn">
+          Expand Map
+          <span class="material-symbols-outlined text-[14px]">open_in_full</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Sticky Bottom Action Footer (Viewport Anchored) -->
+<div class="sticky bottom-0 z-40 bg-surface-dim/95 backdrop-blur-xl px-gutter pt-3 pb-space-lg shadow-[0_-8px_20px_rgba(0,0,0,0.6)] flex flex-col gap-space-sm">
+<div class="flex items-center gap-space-sm w-full">
+<button class="flex-1 h-13 py-3 px-4 rounded-xl bg-surface-container text-text-primary font-label-lg text-label-lg active:scale-[0.98] transition-transform flex items-center justify-center gap-2" id="view-map-action">
+<span class="material-symbols-outlined text-[20px] text-text-secondary">map</span>
+        View on Map
+      </button>
+<button class="flex-[2] h-13 py-3 px-5 rounded-xl bg-brand-green text-on-secondary-fixed font-headline-sm text-headline-sm active:bg-dark-green active:scale-[0.98] transition-transform flex items-center justify-center gap-2 shadow-lg shadow-brand-green/20" id="directions-action">
+<span class="material-symbols-outlined text-[22px]">near_me</span>
+        Get Directions
+      </button>
+</div>
+<p class="text-center font-label-sm text-label-sm text-text-muted">Prices crowd-sourced and verified with UK CMA Fuel Registry</p>
+</div>
+</div>
+<script>
+  // Micro-interactions & Toast Feedback
+  const copyBtn = document.getElementById('copy-btn');
+  const copyIcon = document.getElementById('copy-icon');
+  const addressText = document.getElementById('station-address')?.innerText || '204 Lavender Hill, Clapham Junction, London SW11 1JG';
+
+  if (copyBtn) {
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard?.writeText(addressText).catch(() => {});
+      copyIcon.textContent = 'done';
+      copyIcon.classList.add('text-brand-green');
+      setTimeout(() => {
+        copyIcon.textContent = 'content_copy';
+        copyIcon.classList.remove('text-brand-green');
+      }, 2000);
+    });
+  }
+
+  const favBtn = document.getElementById('favorite-btn');
+  const favIcon = document.getElementById('fav-icon');
+  let isFav = false;
+  if (favBtn) {
+    favBtn.addEventListener('click', () => {
+      isFav = !isFav;
+      favIcon.textContent = isFav ? 'favorite' : 'favorite_border';
+      if (isFav) {
+        favIcon.classList.add('text-brand-green');
+        favIcon.style.fontVariationSettings = "'FILL' 1";
+      } else {
+        favIcon.classList.remove('text-brand-green');
+        favIcon.style.fontVariationSettings = "'FILL' 0";
+      }
+    });
+  }
+
+  const directionsBtn = document.getElementById('directions-action');
+  if (directionsBtn) {
+    directionsBtn.addEventListener('click', () => {
+      const encodedAddr = encodeURIComponent(addressText);
+      window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodedAddr}`, '_blank');
+    });
+  }
+
+  const viewMapBtn = document.getElementById('view-map-action');
+  const previewMapBtn = document.getElementById('preview-map-btn');
+  const triggerMap = () => {
+    const encodedAddr = encodeURIComponent(addressText);
+    window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddr}`, '_blank');
+  };
+
+  if (viewMapBtn) viewMapBtn.addEventListener('click', triggerMap);
+  if (previewMapBtn) previewMapBtn.addEventListener('click', triggerMap);
+
+  const shareBtn = document.getElementById('share-btn');
+  if (shareBtn) {
+    shareBtn.addEventListener('click', async () => {
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: 'Asda Clapham Superstore - Cheap Fuel UK',
+            text: 'Found E10 Petrol for 138.9p at Asda Clapham Superstore via Petrol Hunt UK!',
+            url: window.location.href,
+          });
+        } catch (e) {}
+      } else {
+        navigator.clipboard?.writeText(window.location.href).catch(() => {});
+        alert('Station link copied to clipboard!');
+      }
+    });
+  }
+</script></main></body></html>

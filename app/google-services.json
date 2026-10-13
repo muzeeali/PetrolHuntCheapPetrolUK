@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "230354974587",
+    "project_id": "petrol-hunt-uk",
+    "storage_bucket": "petrol-hunt-uk.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:230354974587:android:b22b248f1ad5d22765afde",
+        "android_client_info": {
+          "package_name": "com.zeetech.petrolmap.fuelpricesuk"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDm5He_s3xPkLeQHxzWvER-4OJG7Er46NI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

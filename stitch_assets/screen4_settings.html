@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_tab" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "feedback-success": "#35E879", "primary-fixed": "#64ff92", "outline": "#859585", "background": "#111317", "surface-container-high": "#282a2e", "surface": "#171A20", "tertiary-fixed": "#ffdcbd", "on-primary-container": "#00632d", "price-average": "#FFC857", "on-secondary-fixed-variant": "#005225", "on-secondary-fixed": "#00210b", "on-tertiary-fixed": "#2c1600", "tertiary": "#ffe3cb", "surface-dim": "#111317", "error-container": "#93000a", "surface-variant": "#333539", "on-secondary-container": "#003716", "inverse-surface": "#e2e2e8", "text-muted": "#6F7887", "primary": "#8fffa8", "tertiary-container": "#ffbf7f", "primary-container": "#35e879", "on-tertiary-container": "#794b16", "on-surface": "#e2e2e8", "price-cheap": "#35E879", "secondary": "#55e080", "inverse-primary": "#006d32", "on-tertiary-fixed-variant": "#673d06", "text-secondary": "#9AA3B2", "error": "#ffb4ab", "surface-elevated": "#1E222A", "inverse-on-surface": "#2f3035", "outline-variant": "#3c4a3d", "surface-container-highest": "#333539", "tertiary-fixed-dim": "#f9ba7a", "on-primary-fixed": "#00210b", "on-primary-fixed-variant": "#005224", "surface-bright": "#37393e", "surface-tint": "#2ce375", "on-secondary": "#003917", "surface-container-low": "#1a1c20", "text-primary": "#FFFFFF", "border": "#292E38", "secondary-container": "#00ad54", "surface-container": "#1e2024", "brand-green": "#35E879", "on-background": "#e2e2e8", "on-error-container": "#ffdad6", "on-primary": "#003917", "on-tertiary": "#4a2800", "price-expensive": "#FF5C5C", "secondary-fixed": "#74fd9a", "on-error": "#690005", "feedback-error": "#FF5C5C", "primary-fixed-dim": "#2ce375", "dark-green": "#20B85E", "secondary-fixed-dim": "#55e080", "on-surface-variant": "#bbcbb9", "surface-container-lowest": "#0c0e12" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-md": "0.75rem", "space-lg": "1rem", "gutter": "1rem", "margin": "1rem", "space-sm": "0.5rem", "space-xs": "0.25rem", "space-xl": "1.5rem" }, "fontFamily": { "label-md": ["Inter"], "headline-lg": ["Inter"], "label-sm": ["Inter"], "price-hero": ["Inter"], "display-lg": ["Inter"], "label-lg": ["Inter"], "headline-md": ["Inter"], "body-sm": ["Inter"], "body-md": ["Inter"], "body-lg": ["Inter"], "headline-sm": ["Inter"] }, "fontSize": { "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }], "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "label-sm": ["10px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600" }], "price-hero": ["28px", { "lineHeight": "34px", "letterSpacing": "-0.03em", "fontWeight": "700" }], "display-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }], "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }], "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }], "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }], "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }] } } } };</script><style>@layer base{html,body{width:100%;margin:0;padding:0;background-color:#111317;color:#e2e2e8;font-family:'Inter',sans-serif;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style></head><body class="bg-background font-body-md text-on-surface flex flex-col min-h-screen"><header class="fixed top-0 inset-x-0 z-50 bg-surface/85 backdrop-blur-xl pt-safe shadow-[0_1px_8px_rgba(0,0,0,0.45)]"><div class="h-16 px-gutter flex items-center justify-between"><div class="flex items-center gap-space-sm"><img alt="Petrol Hunt Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDdT6uPQw1dRNDWZtJ8BL9o9jpItE3YgAkIyvDQxRhQWtoAuIL0eDVYuKQj-hsWV8lnINNXZxok_CO2f71BfYRd8XJyq18zs5OTp6qS7uRdfocFoSmOrjrUCn0EyTU8_dKn85kmWts7HNa1aLRyzQ_inx-qgIfLIWMVqE3DE-MFKW9IGlguymHX6pyhmxGZuLoOFC-oQKPBM47y7uEpVqJFg-mwRd3UkLzlP5BdFun2Zk0Iw5jUQiA"/><div class="flex flex-col"><span class="font-label-sm text-label-sm uppercase text-text-muted leading-none tracking-wider">UK Fuel Live</span><span class="font-headline-sm text-headline-sm text-text-primary tracking-tight">Settings</span></div></div><div class="flex items-center gap-space-sm"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 pb-24 bg-background min-h-screen"><div class="flex flex-col w-full px-margin pb-6 gap-space-lg">
+<!-- Title Header & Live Status Pill -->
+<div class="flex items-center justify-between pt-2">
+<div>
+<h1 class="font-headline-md text-headline-md text-text-primary tracking-tight">Settings</h1>
+<p class="font-body-sm text-body-sm text-text-muted mt-0.5">Customise your telemetry &amp; feed parameters</p>
+</div>
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high shadow-sm">
+<span class="w-2 h-2 rounded-full bg-feedback-success animate-pulse"></span>
+<span class="font-label-sm text-label-sm text-text-secondary uppercase tracking-wider">Sync Active</span>
+</div>
+</div>
+<!-- Savings Pulse Gamification Widget (Moment of Delight) -->
+<div class="relative overflow-hidden rounded-xl bg-gradient-to-br from-surface-elevated to-surface p-4 shadow-md">
+<div class="absolute -right-6 -bottom-6 w-28 h-28 rounded-full bg-primary/10 blur-xl pointer-events-none"></div>
+<div class="flex items-center justify-between relative z-10">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary shadow-sm">
+<span class="material-symbols-outlined text-[22px]">savings</span>
+</div>
+<div>
+<div class="font-label-sm text-label-sm uppercase tracking-wider text-text-muted">Estimated Savings</div>
+<div class="font-price-hero text-price-hero text-text-primary leading-tight mt-0.5">£14.20 <span class="font-body-sm text-body-sm text-primary font-normal">this month</span></div>
+</div>
+</div>
+<div class="text-right">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-primary/15 text-primary font-label-sm text-label-sm">
+          Top 8% Hunter
+        </span>
+</div>
+</div>
+</div>
+<!-- Section A: Preferences -->
+<section class="flex flex-col gap-1.5">
+<div class="flex items-center gap-1.5 px-1">
+<span class="material-symbols-outlined text-primary text-[16px]">tune</span>
+<h2 class="font-label-sm text-label-sm uppercase text-text-muted tracking-widest">Preferences</h2>
+</div>
+<div class="flex flex-col rounded-xl bg-surface overflow-hidden shadow-sm">
+<!-- Default Fuel -->
+<button class="group flex items-center justify-between min-h-[48px] px-4 py-3 bg-surface hover:bg-surface-elevated transition-colors text-left" id="pref-fuel-btn" type="button">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-text-secondary">
+<span class="material-symbols-outlined text-[18px]">local_gas_station</span>
+</div>
+<span class="font-body-md text-body-md text-text-primary">Default Fuel</span>
+</div>
+<div class="flex items-center gap-1.5 text-text-secondary">
+<span class="font-label-md text-label-md text-primary font-semibold" id="pref-fuel-val">E10 Petrol</span>
+<span class="material-symbols-outlined text-text-muted text-[18px] group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+</div>
+</button>
+<!-- Search Radius -->
+<button class="group flex items-center justify-between min-h-[48px] px-4 py-3 bg-surface-container-low hover:bg-surface-elevated transition-colors text-left" id="pref-radius-btn" type="button">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-text-secondary">
+<span class="material-symbols-outlined text-[18px]">radar</span>
+</div>
+<span class="font-body-md text-body-md text-text-primary">Search Radius</span>
+</div>
+<div class="flex items-center gap-1.5 text-text-secondary">
+<span class="font-label-md text-label-md text-text-secondary font-medium" id="pref-radius-val">5 miles</span>
+<span class="material-symbols-outlined text-text-muted text-[18px] group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+</div>
+</button>
+<!-- Default Sorting -->
+<button class="group flex items-center justify-between min-h-[48px] px-4 py-3 bg-surface hover:bg-surface-elevated transition-colors text-left" id="pref-sort-btn" type="button">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-text-secondary">
+<span class="material-symbols-outlined text-[18px]">swap_vert</span>
+</div>
+<span class="font-body-md text-body-md text-text-primary">Default Sorting</span>
+</div>
+<div class="flex items-center gap-1.5 text-text-secondary">
+<span class="font-label-md text-label-md text-text-secondary font-medium" id="pref-sort-val">Cheapest</span>
+<span class="material-symbols-outlined text-text-muted text-[18px] group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+</div>
+</button>
+</div>
+</section>
+<!-- Section B: Navigation -->
+<section class="flex flex-col gap-1.5">
+<div class="flex items-center gap-1.5 px-1">
+<span class="material-symbols-outlined text-primary text-[16px]">navigation</span>
+<h2 class="font-label-sm text-label-sm uppercase text-text-muted tracking-widest">Navigation</h2>
+</div>
+<div class="flex flex-col rounded-xl bg-surface overflow-hidden shadow-sm">
+<div class="p-3 bg-surface">
+<label class="block font-body-sm text-body-sm text-text-muted mb-2 px-1" for="nav-selector">Preferred Route App</label>
+<div class="grid grid-cols-3 gap-2" id="nav-options">
+<button class="nav-choice flex flex-col items-center justify-center py-2.5 px-2 rounded-lg bg-surface-elevated text-primary font-label-md text-label-md text-center transition-all shadow-sm" data-nav="default" type="button">
+<span class="material-symbols-outlined text-[20px] mb-1">explore</span>
+<span class="truncate w-full text-center">System default</span>
+</button>
+<button class="nav-choice flex flex-col items-center justify-center py-2.5 px-2 rounded-lg bg-surface-container text-text-secondary font-label-md text-label-md text-center hover:text-text-primary transition-all" data-nav="google" type="button">
+<span class="material-symbols-outlined text-[20px] mb-1">map</span>
+<span class="truncate w-full text-center">Google Maps</span>
+</button>
+<button class="nav-choice flex flex-col items-center justify-center py-2.5 px-2 rounded-lg bg-surface-container text-text-secondary font-label-md text-label-md text-center hover:text-text-primary transition-all" data-nav="waze" type="button">
+<span class="material-symbols-outlined text-[20px] mb-1">near_me</span>
+<span class="truncate w-full text-center">Waze</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Section C: Fuel Data -->
+<section class="flex flex-col gap-1.5">
+<div class="flex items-center gap-1.5 px-1">
+<span class="material-symbols-outlined text-primary text-[16px]">database</span>
+<h2 class="font-label-sm text-label-sm uppercase text-text-muted tracking-widest">Fuel Data</h2>
+</div>
+<div class="flex flex-col rounded-xl bg-surface overflow-hidden shadow-sm">
+<!-- Price Status -->
+<div class="flex items-center justify-between min-h-[48px] px-4 py-3 bg-surface">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-text-secondary">
+<span class="material-symbols-outlined text-[18px]">wifi_tethering</span>
+</div>
+<div>
+<div class="font-body-md text-body-md text-text-primary">Price Status</div>
+<div class="font-body-sm text-body-sm text-text-muted">UK Realtime Station API</div>
+</div>
+</div>
+<div class="flex items-center gap-2 px-2.5 py-1 rounded-full bg-feedback-success/10">
+<span class="w-2 h-2 rounded-full bg-feedback-success"></span>
+<span class="font-label-sm text-label-sm text-feedback-success font-medium">Live · Updated 28 mins ago</span>
+</div>
+</div>
+<!-- Refresh Prices Action -->
+<button class="group flex items-center justify-between min-h-[48px] px-4 py-3 bg-surface-container-low hover:bg-surface-elevated transition-colors text-left" id="refresh-action-btn" type="button">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary group-hover:rotate-180 transition-transform duration-500">
+<span class="material-symbols-outlined text-[18px]" id="refresh-icon">sync</span>
+</div>
+<div>
+<span class="font-body-md text-body-md text-text-primary group-hover:text-primary transition-colors">Refresh Prices</span>
+<div class="font-body-sm text-body-sm text-text-muted" id="refresh-status">Forces fresh sync of local UK forecourts</div>
+</div>
+</div>
+<div class="px-3 py-1 rounded bg-surface-elevated font-label-sm text-label-sm text-text-secondary group-hover:text-text-primary transition-colors">
+          Sync
+        </div>
+</button>
+<!-- Clear Saved Data Destructive Action -->
+<button class="group flex items-center justify-between min-h-[48px] px-4 py-3 bg-surface hover:bg-error-container/20 transition-colors text-left" id="clear-data-btn" type="button">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-error-container/40 flex items-center justify-center text-price-expensive">
+<span class="material-symbols-outlined text-[18px]">delete_sweep</span>
+</div>
+<div>
+<div class="font-body-md text-body-md text-price-expensive font-medium">Clear Saved Data</div>
+<div class="font-body-sm text-body-sm text-text-muted">Removes cached stations &amp; history</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-price-expensive/70 group-hover:text-price-expensive text-[20px]">chevron_right</span>
+</button>
+</div>
+</section>
+<!-- Section D: Privacy & Permissions -->
+<section class="flex flex-col gap-1.5">
+<div class="flex items-center gap-1.5 px-1">
+<span class="material-symbols-outlined text-primary text-[16px]">lock</span>
+<h2 class="font-label-sm text-label-sm uppercase text-text-muted tracking-widest">Privacy &amp; Permissions</h2>
+</div>
+<div class="flex flex-col rounded-xl bg-surface overflow-hidden shadow-sm">
+<!-- Location Permission -->
+<div class="flex items-center justify-between min-h-[48px] px-4 py-3 bg-surface">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-text-secondary">
+<span class="material-symbols-outlined text-[18px]">my_location</span>
+</div>
+<div class="flex flex-col">
+<span class="font-body-md text-body-md text-text-primary">Location Permission</span>
+<span class="font-body-sm text-body-sm text-text-secondary">Precise location while using app</span>
+</div>
+</div>
+<div class="flex items-center gap-1">
+<span class="font-label-sm text-label-sm text-feedback-success bg-feedback-success/10 px-2 py-0.5 rounded">Granted</span>
+</div>
+</div>
+<!-- Privacy Policy Link -->
+<a class="group flex items-center justify-between min-h-[48px] px-4 py-3 bg-surface-container-low hover:bg-surface-elevated transition-colors" href="#">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-text-secondary">
+<span class="material-symbols-outlined text-[18px]">policy</span>
+</div>
+<span class="font-body-md text-body-md text-text-primary">Privacy Policy</span>
+</div>
+<div class="flex items-center gap-1 text-text-muted group-hover:text-text-primary transition-colors">
+<span class="font-label-sm text-label-sm">External</span>
+<span class="material-symbols-outlined text-[16px]">open_in_new</span>
+</div>
+</a>
+</div>
+</section>
+<!-- Section E: About & Telemetry Info -->
+<section class="flex flex-col gap-1.5">
+<div class="flex items-center gap-1.5 px-1">
+<span class="material-symbols-outlined text-primary text-[16px]">info</span>
+<h2 class="font-label-sm text-label-sm uppercase text-text-muted tracking-widest">About</h2>
+</div>
+<div class="flex flex-col rounded-xl bg-surface overflow-hidden shadow-sm">
+<!-- App Brand Card -->
+<div class="p-4 bg-surface-container-low flex items-center gap-4">
+<div class="w-14 h-14 rounded-xl bg-surface-elevated p-1.5 flex items-center justify-center shadow-md shrink-0">
+<img alt="Petrol Hunt Logo" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDdT6uPQw1dRNDWZtJ8BL9o9jpItE3YgAkIyvDQxRhQWtoAuIL0eDVYuKQj-hsWV8lnINNXZxok_CO2f71BfYRd8XJyq18zs5OTp6qS7uRdfocFoSmOrjrUCn0EyTU8_dKn85kmWts7HNa1aLRyzQ_inx-qgIfLIWMVqE3DE-MFKW9IGlguymHX6pyhmxGZuLoOFC-oQKPBM47y7uEpVqJFg-mwRd3UkLzlP5BdFun2Zk0Iw5jUQiA"/>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-headline-sm text-text-primary truncate">Petrol Hunt: Cheap Petrol UK</span>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="font-label-sm text-label-sm text-text-muted">v1.0.4 (Build 42)</span>
+<span class="w-1 h-1 rounded-full bg-text-muted"></span>
+<span class="font-label-sm text-label-sm text-primary">Stable Channel</span>
+</div>
+</div>
+</div>
+<!-- Fuel Data Attribution -->
+<a class="group flex items-center justify-between min-h-[48px] px-4 py-3 bg-surface hover:bg-surface-elevated transition-colors" href="https://checkfuelprices.co.uk" rel="noopener noreferrer" target="_blank">
+<div class="flex items-center gap-3 min-w-0">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-text-secondary shrink-0">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+</div>
+<div class="min-w-0">
+<div class="font-body-md text-body-md text-text-primary truncate">Fuel Data Attribution</div>
+<div class="font-body-sm text-body-sm text-text-muted truncate">Prices provided by CheckFuelPrices.co.uk</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary text-[18px] group-hover:translate-x-0.5 transition-transform shrink-0">open_in_new</span>
+</a>
+<!-- Terms of Use -->
+<a class="group flex items-center justify-between min-h-[48px] px-4 py-3 bg-surface-container-low hover:bg-surface-elevated transition-colors" href="#">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-text-secondary">
+<span class="material-symbols-outlined text-[18px]">description</span>
+</div>
+<span class="font-body-md text-body-md text-text-primary">Terms of Use</span>
+</div>
+<span class="material-symbols-outlined text-text-muted group-hover:text-text-primary text-[18px] transition-colors">chevron_right</span>
+</a>
+<!-- Open Source Licenses -->
+<a class="group flex items-center justify-between min-h-[48px] px-4 py-3 bg-surface hover:bg-surface-elevated transition-colors" href="#">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-text-secondary">
+<span class="material-symbols-outlined text-[18px]">code</span>
+</div>
+<span class="font-body-md text-body-md text-text-primary">Open-Source Licenses</span>
+</div>
+<span class="material-symbols-outlined text-text-muted group-hover:text-text-primary text-[18px] transition-colors">chevron_right</span>
+</a>
+</div>
+</section>
+<!-- Clear Disclosure & Heartwarming UK Motorist Note -->
+<footer class="mt-2 mb-4 px-2 flex flex-col items-center text-center gap-2">
+<div class="w-8 h-1 rounded-full bg-surface-container-high mb-1"></div>
+<p class="font-body-sm text-body-sm text-text-muted leading-relaxed">
+      Petrol Hunt is an independent automotive utility and is not affiliated with or endorsed by the UK Government.
+    </p>
+<div class="flex items-center gap-1.5 text-text-muted font-label-sm text-label-sm mt-1">
+<span>Crafted for UK Drivers</span>
+<span>•</span>
+<span class="text-primary font-medium">Drive smart, save per litre</span>
+</div>
+</footer>
+<!-- Interactive Toast Notification Element -->
+<div class="fixed bottom-20 inset-x-4 max-w-sm mx-auto bg-surface-elevated text-text-primary px-4 py-3 rounded-xl shadow-xl flex items-center justify-between opacity-0 pointer-events-none transition-all duration-300 z-50" id="settings-toast">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-feedback-success text-[20px]" id="toast-icon">check_circle</span>
+<span class="font-body-md text-body-md font-medium" id="toast-message">Preferences updated</span>
+</div>
+<span class="font-label-sm text-label-sm text-text-muted">Dismiss</span>
+</div>
+</div>
+<script>
+  (function initSettingsInteractions() {
+    // Toast trigger
+    const toast = document.getElementById('settings-toast');
+    const toastMsg = document.getElementById('toast-message');
+    const toastIcon = document.getElementById('toast-icon');
+    let toastTimeout;
+
+    function showToast(message, isSuccess = true) {
+      if (!toast) return;
+      clearTimeout(toastTimeout);
+      toastMsg.textContent = message;
+      toastIcon.textContent = isSuccess ? 'check_circle' : 'info';
+      toastIcon.className = isSuccess 
+        ? 'material-symbols-outlined text-feedback-success text-[20px]' 
+        : 'material-symbols-outlined text-price-expensive text-[20px]';
+      toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-2');
+      toast.classList.add('opacity-100', 'translate-y-0');
+
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-2');
+      }, 2600);
+    }
+
+    // Toggle Fuel preference cycle
+    const fuelBtn = document.getElementById('pref-fuel-btn');
+    const fuelVal = document.getElementById('pref-fuel-val');
+    const fuels = ['E10 Petrol', 'B7 Diesel', 'Super Unleaded 97+', 'Premium Diesel'];
+    let fuelIdx = 0;
+    if (fuelBtn && fuelVal) {
+      fuelBtn.addEventListener('click', () => {
+        fuelIdx = (fuelIdx + 1) % fuels.length;
+        fuelVal.textContent = fuels[fuelIdx];
+        showToast(`Default fuel switched to ${fuels[fuelIdx]}`);
+      });
+    }
+
+    // Toggle Search Radius cycle
+    const radiusBtn = document.getElementById('pref-radius-btn');
+    const radiusVal = document.getElementById('pref-radius-val');
+    const radii = ['3 miles', '5 miles', '10 miles', '15 miles'];
+    let radIdx = 1;
+    if (radiusBtn && radiusVal) {
+      radiusBtn.addEventListener('click', () => {
+        radIdx = (radIdx + 1) % radii.length;
+        radiusVal.textContent = radii[radIdx];
+        showToast(`Search radius set to ${radii[radIdx]}`);
+      });
+    }
+
+    // Toggle Sorting cycle
+    const sortBtn = document.getElementById('pref-sort-btn');
+    const sortVal = document.getElementById('pref-sort-val');
+    const sorts = ['Cheapest', 'Closest Distance', 'Top Rated'];
+    let sortIdx = 0;
+    if (sortBtn && sortVal) {
+      sortBtn.addEventListener('click', () => {
+        sortIdx = (sortIdx + 1) % sorts.length;
+        sortVal.textContent = sorts[sortIdx];
+        showToast(`Prioritising: ${sorts[sortIdx]}`);
+      });
+    }
+
+    // Navigation App selector
+    const navChoices = document.querySelectorAll('.nav-choice');
+    navChoices.forEach(choice => {
+      choice.addEventListener('click', () => {
+        navChoices.forEach(c => {
+          c.classList.remove('bg-surface-elevated', 'text-primary');
+          c.classList.add('bg-surface-container', 'text-text-secondary');
+        });
+        choice.classList.remove('bg-surface-container', 'text-text-secondary');
+        choice.classList.add('bg-surface-elevated', 'text-primary');
+        const appName = choice.querySelector('span:nth-child(2)').textContent;
+        showToast(`Navigation handoff set to ${appName}`);
+      });
+    });
+
+    // Refresh action trigger
+    const refreshBtn = document.getElementById('refresh-action-btn');
+    const refreshIcon = document.getElementById('refresh-icon');
+    const refreshStatus = document.getElementById('refresh-status');
+    if (refreshBtn && refreshIcon) {
+      refreshBtn.addEventListener('click', () => {
+        refreshIcon.classList.add('animate-spin');
+        refreshStatus.textContent = 'Contacting forecourt data nodes...';
+        setTimeout(() => {
+          refreshIcon.classList.remove('animate-spin');
+          refreshStatus.textContent = 'Forecourt feeds updated just now';
+          showToast('Updated 142 stations across UK network');
+        }, 800);
+      });
+    }
+
+    // Clear Saved Data action
+    const clearBtn = document.getElementById('clear-data-btn');
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        const confirmed = confirm('Clear all cached fuel station records, price historical curves, and search presets?');
+        if (confirmed) {
+          showToast('Cache cleared successfully. Fresh reload ready.', false);
+        }
+      });
+    }
+  })();
+</script></main><nav class="fixed bottom-0 inset-x-0 z-50 pb-safe bg-surface/90 backdrop-blur-xl shadow-[0_-2px_16px_rgba(0,0,0,0.5)]" data-active-classes="text-brand-green"><div class="grid grid-cols-2 items-center h-16 max-w-md mx-auto px-margin"><a class="flex flex-col items-center justify-center gap-1 h-full min-h-[44px] text-text-muted hover:text-on-surface transition-colors duration-150" data-path="map" href="#"><span class="material-symbols-outlined text-[24px]">map</span><span class="font-label-sm text-label-sm font-semibold tracking-wide uppercase">Map</span></a><a aria-current="page" class="flex flex-col items-center justify-center gap-1 h-full min-h-[44px] transition-colors duration-150 text-brand-green" data-path="settings" href="#"><span class="material-symbols-outlined text-[24px]">tune</span><span class="font-label-sm text-label-sm font-semibold tracking-wide uppercase">Settings</span></a></div></nav></body></html>
