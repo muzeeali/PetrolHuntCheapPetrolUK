@@ -182,6 +182,7 @@ fun MainMapScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .statusBarsPadding()
             ) {
                 Row(
                     modifier = Modifier
@@ -346,7 +347,7 @@ fun MainMapScreen(
                                 .background(PetrolSurfaceElevated)
                                 .border(1.dp, PetrolBorder, RoundedCornerShape(10.dp))
                         ) {
-                            FuelType.values().forEach { fuel ->
+                            FuelType.entries.forEach { fuel ->
                                 DropdownMenuItem(
                                     text = {
                                         Row(

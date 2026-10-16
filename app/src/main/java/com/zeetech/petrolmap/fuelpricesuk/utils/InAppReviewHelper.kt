@@ -54,7 +54,7 @@ object InAppReviewHelper {
      * Direct review trigger (e.g. user explicitly taps "Rate Us" in settings).
      */
     fun launchDirectReview(activity: Activity, prefs: PreferencesManager) {
-        prefs.markUserRated()
+        prefs.markReviewPrompted()
         Firebase.analytics.logEvent("user_clicked_rate_us", null)
 
         val reviewManager: ReviewManager = ReviewManagerFactory.create(activity)

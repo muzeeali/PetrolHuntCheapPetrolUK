@@ -34,12 +34,13 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocalGasStation
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Sort
+import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material.icons.filled.Tune
@@ -94,9 +95,11 @@ fun SettingsScreen(
     onSortClick: () -> Unit,
     onNavAppChanged: (NavigationApp) -> Unit,
     onRefreshPrices: () -> Unit,
-    onClearSavedData: () -> Unit
+    onClearSavedData: () -> Unit,
+    prefs: PreferencesManager? = null
 ) {
     val context = LocalContext.current
+    val effectivePrefs = prefs ?: remember(context) { PreferencesManager(context) }
     var showClearConfirm by remember { mutableStateOf(false) }
     var infoDialogTitle by remember { mutableStateOf<String?>(null) }
     var infoDialogMessage by remember { mutableStateOf<String?>(null) }
@@ -201,7 +204,7 @@ fun SettingsScreen(
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                 ) {
                     Text(
-                        text = "v1.0.0",
+                        text = "v${com.zeetech.petrolmap.fuelpricesuk.BuildConfig.VERSION_NAME}",
                         color = PetrolBrandGreen,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold
@@ -231,10 +234,32 @@ fun SettingsScreen(
             )
 
             SettingsRow(
-                icon = Icons.Default.Sort,
+                icon = Icons.AutoMirrored.Filled.Sort,
                 title = "Default Sorting",
                 value = currentSort.label,
-                onClick = onSortClick,
+                onClick = onSortClick
+            )
+
+            var isAlertsOn by remember { mutableStateOf(effectivePrefs.fuelAlertsEnabled) }
+            SettingsRow(
+                icon = Icons.Default.Notifications,
+                title = "Price Drop Alerts",
+                value = if (isAlertsOn) "Enabled" else "Off",
+                valueColor = if (isAlertsOn) PetrolBrandGreen else PetrolSecondaryText,
+                onClick = {
+                    val newState = !isAlertsOn
+                    isAlertsOn = newState
+                    effectivePrefs.fuelAlertsEnabled = newState
+                    if (newState) {
+                        com.google.firebase.messaging.FirebaseMessaging.getInstance()
+                            .subscribeToTopic(com.zeetech.petrolmap.fuelpricesuk.services.PetrolFirebaseMessagingService.TOPIC_UK_FUEL_ALERTS)
+                        Toast.makeText(context, "Fuel price alerts enabled", Toast.LENGTH_SHORT).show()
+                    } else {
+                        com.google.firebase.messaging.FirebaseMessaging.getInstance()
+                            .unsubscribeFromTopic(com.zeetech.petrolmap.fuelpricesuk.services.PetrolFirebaseMessagingService.TOPIC_UK_FUEL_ALERTS)
+                        Toast.makeText(context, "Fuel price alerts disabled", Toast.LENGTH_SHORT).show()
+                    }
+                },
                 isLast = true
             )
         }
@@ -261,7 +286,7 @@ fun SettingsScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    NavigationApp.values().forEach { app ->
+                    NavigationApp.entries.forEach { app ->
                         val isSelected = app == currentNavApp
                         Box(
                             modifier = Modifier
@@ -335,9 +360,8 @@ fun SettingsScreen(
                 valueColor = PetrolBrandGreen,
                 onClick = {
                     val act = context as? android.app.Activity
-                    val userPrefs = PreferencesManager(context)
                     if (act != null) {
-                        com.zeetech.petrolmap.fuelpricesuk.utils.InAppReviewHelper.launchDirectReview(act, userPrefs)
+                        com.zeetech.petrolmap.fuelpricesuk.utils.InAppReviewHelper.launchDirectReview(act, effectivePrefs)
                     } else {
                         val packageName = context.packageName
                         try {
@@ -388,7 +412,7 @@ I would like to report a fuel price discrepancy / share feedback:
 • Comments / Feedback: 
 
 ---
-App Version: 1.0.0
+App Version: ${com.zeetech.petrolmap.fuelpricesuk.BuildConfig.VERSION_NAME} (${com.zeetech.petrolmap.fuelpricesuk.BuildConfig.VERSION_CODE})
 Device: ${Build.MANUFACTURER} ${Build.MODEL} (Android ${Build.VERSION.RELEASE})
                     """.trimIndent()
 
@@ -429,8 +453,16 @@ Device: ${Build.MANUFACTURER} ${Build.MODEL} (Android ${Build.VERSION.RELEASE})
                 title = "Privacy Policy",
                 value = "View",
                 onClick = {
-                    infoDialogTitle = "Privacy Policy"
-                    infoDialogMessage = "Petrol Map: UK Fuel Prices does not collect or sell your personal data.\n\n• Location Data: Used strictly on-device to query nearby forecourts and calculate distances.\n• Fuel Queries: Anonymized requests sent through our Cloudflare API edge proxy.\n• Local Preferences: Search history and station caches remain strictly on your device.\n• No Account: Petrol Map requires no registration or personal account."
+                    val privacyUrl = "https://zeetechsolutionspvt.blogspot.com/2026/10/petrol-map-uk-fuel-prices.html"
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(privacyUrl)).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    try {
+                        context.startActivity(intent)
+                    } catch (_: Exception) {
+                        infoDialogTitle = "Privacy Policy"
+                        infoDialogMessage = "Petrol Map: UK Fuel Prices Privacy Policy:\n\nHosted Policy: $privacyUrl\n\n• Location Data: Used on-device only while using the app to query nearby stations and calculate distances. Location data is never stored on servers.\n• Fuel Queries: Anonymized requests sent through our Cloudflare API edge proxy.\n• Analytics & Diagnostics: Google Firebase Analytics and Crashlytics collect non-personally identifiable diagnostic and crash information to maintain app quality.\n• Notifications: Push alerts delivered via Firebase Cloud Messaging if enabled.\n• No Account: Petrol Map requires no user login, tracking accounts, or personal data collection."
+                    }
                 }
             )
 
@@ -542,6 +574,20 @@ Device: ${Build.MANUFACTURER} ${Build.MODEL} (Android ${Build.VERSION.RELEASE})
             confirmButton = {
                 TextButton(onClick = { infoDialogTitle = null }) {
                     Text("Close", color = PetrolBrandGreen, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                if (infoDialogTitle == "Privacy Policy") {
+                    TextButton(onClick = {
+                        val privacyUrl = "https://zeetechsolutionspvt.blogspot.com/2026/10/petrol-map-uk-fuel-prices.html"
+                        try {
+                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(privacyUrl)).apply {
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            })
+                        } catch (_: Exception) {}
+                    }) {
+                        Text("Open Online", color = PetrolPrimaryText)
+                    }
                 }
             },
             containerColor = PetrolSurfaceElevated,

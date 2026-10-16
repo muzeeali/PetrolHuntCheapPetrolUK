@@ -22,7 +22,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Directions
@@ -132,7 +132,7 @@ fun StationDetailDialog(
                             .background(PetrolSurfaceElevated, CircleShape)
                     ) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
                             tint = PetrolPrimaryText,
                             modifier = Modifier.size(18.dp)
@@ -265,7 +265,7 @@ fun StationDetailDialog(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                FuelType.values().forEach { fuel ->
+                FuelType.entries.forEach { fuel ->
                     val isCurrent = fuel == currentFuel
                     val fuelPrice = currentPrices[fuel.code] ?: if (isCurrent) activePrice else null
                     val fuelUpdated = currentUpdatedDates[fuel.code] ?: if (isCurrent && activeUpdatedText.isNotBlank()) activeUpdatedText else null

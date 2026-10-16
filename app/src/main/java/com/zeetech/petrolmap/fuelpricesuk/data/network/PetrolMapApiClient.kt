@@ -76,48 +76,49 @@ object PetrolMapApiClient {
 
         val request = Request.Builder()
             .url(workerUrl)
-            .header("User-Agent", "PetrolMapUK/1.4 (Android Mobile App; en-GB)")
+            .header("User-Agent", "PetrolMapUK/${com.zeetech.petrolmap.fuelpricesuk.BuildConfig.VERSION_NAME} (Android Mobile App; en-GB)")
             .header("Accept", "application/json")
             .build()
 
         try {
-            val response = client.newCall(request).execute()
-            val responseBody = response.body?.string()
-            val isEdgeCached = response.header("X-Edge-Cache") == "HIT"
+            client.newCall(request).execute().use { response ->
+                val responseBody = response.body?.string()
+                val isEdgeCached = response.header("X-Edge-Cache") == "HIT"
 
-            if (response.isSuccessful && responseBody != null) {
-                val json = JSONObject(responseBody)
-                if (json.optBoolean("success", false)) {
-                    val isUkResp = json.optBoolean("isUk", true)
-                    if (!isUkResp) {
+                if (response.isSuccessful && responseBody != null) {
+                    val json = JSONObject(responseBody)
+                    if (json.optBoolean("success", false)) {
+                        val isUkResp = json.optBoolean("isUk", true)
+                        if (!isUkResp) {
+                            return@withContext StationsResult.Success(
+                                stations = emptyList(),
+                                isCached = isEdgeCached,
+                                isUk = false,
+                                attribution = json.optString("attribution", "Prices sourced via Fuel Finder & CMA Open Data Scheme"),
+                                fetchedAt = json.optString("fetchedAt", ""),
+                                minPrice = null,
+                                maxPrice = null,
+                                avgPrice = null
+                            )
+                        }
+
+                        val stations = parseStationsArray(json.optJSONArray("stations"), fuel)
+                        val areaStats = json.optJSONObject("areaStats")
+                        val avgPrice = areaStats?.optDouble("avg")?.takeIf { !it.isNaN() }
+                        val minPrice = areaStats?.optDouble("min")?.takeIf { !it.isNaN() } ?: stations.minOfOrNull { it.price }
+                        val maxPrice = areaStats?.optDouble("max")?.takeIf { !it.isNaN() } ?: stations.maxOfOrNull { it.price }
+
                         return@withContext StationsResult.Success(
-                            stations = emptyList(),
+                            stations = stations,
                             isCached = isEdgeCached,
-                            isUk = false,
+                            isUk = true,
                             attribution = json.optString("attribution", "Prices sourced via Fuel Finder & CMA Open Data Scheme"),
                             fetchedAt = json.optString("fetchedAt", ""),
-                            minPrice = null,
-                            maxPrice = null,
-                            avgPrice = null
+                            minPrice = minPrice,
+                            maxPrice = maxPrice,
+                            avgPrice = avgPrice
                         )
                     }
-
-                    val stations = parseStationsArray(json.optJSONArray("stations"), fuel)
-                    val areaStats = json.optJSONObject("areaStats")
-                    val avgPrice = areaStats?.optDouble("avg")?.takeIf { !it.isNaN() }
-                    val minPrice = areaStats?.optDouble("min")?.takeIf { !it.isNaN() } ?: stations.minOfOrNull { it.price }
-                    val maxPrice = areaStats?.optDouble("max")?.takeIf { !it.isNaN() } ?: stations.maxOfOrNull { it.price }
-
-                    return@withContext StationsResult.Success(
-                        stations = stations,
-                        isCached = isEdgeCached,
-                        isUk = true,
-                        attribution = json.optString("attribution", "Prices sourced via Fuel Finder & CMA Open Data Scheme"),
-                        fetchedAt = json.optString("fetchedAt", ""),
-                        minPrice = minPrice,
-                        maxPrice = maxPrice,
-                        avgPrice = avgPrice
-                    )
                 }
             }
         } catch (_: Exception) {
@@ -137,42 +138,43 @@ object PetrolMapApiClient {
             val workerUrl = "$WORKER_URL/v1/station?slug=${slug}"
             val req = Request.Builder()
                 .url(workerUrl)
-                .header("User-Agent", "PetrolMapUK/1.4 (Android Mobile App; en-GB)")
+                .header("User-Agent", "PetrolMapUK/${com.zeetech.petrolmap.fuelpricesuk.BuildConfig.VERSION_NAME} (Android Mobile App; en-GB)")
                 .header("Accept", "application/json")
                 .build()
-            val resp = client.newCall(req).execute()
-            val body = resp.body?.string()
-            if (resp.isSuccessful && body != null) {
-                val json = JSONObject(body)
-                if (json.optBoolean("success", false)) {
-                    val pricesMap = mutableMapOf<String, Double>()
-                    val pricesObj = json.optJSONObject("prices")
-                    if (pricesObj != null) {
-                        val pKeys = pricesObj.keys()
-                        while (pKeys.hasNext()) {
-                            val pk = pKeys.next()
-                            val pv = pricesObj.optDouble(pk)
-                            if (!pv.isNaN() && pv > 0) pricesMap[pk] = pv
+            client.newCall(req).execute().use { resp ->
+                val body = resp.body?.string()
+                if (resp.isSuccessful && body != null) {
+                    val json = JSONObject(body)
+                    if (json.optBoolean("success", false)) {
+                        val pricesMap = mutableMapOf<String, Double>()
+                        val pricesObj = json.optJSONObject("prices")
+                        if (pricesObj != null) {
+                            val pKeys = pricesObj.keys()
+                            while (pKeys.hasNext()) {
+                                val pk = pKeys.next()
+                                val pv = pricesObj.optDouble(pk)
+                                if (!pv.isNaN() && pv > 0) pricesMap[pk] = pv
+                            }
                         }
-                    }
 
-                    val datesMap = mutableMapOf<String, String>()
-                    val datesObj = json.optJSONObject("updatedDates")
-                    if (datesObj != null) {
-                        val dKeys = datesObj.keys()
-                        while (dKeys.hasNext()) {
-                            val dk = dKeys.next()
-                            val dv = datesObj.optString(dk)
-                            if (dv.isNotBlank()) datesMap[dk] = dv
+                        val datesMap = mutableMapOf<String, String>()
+                        val datesObj = json.optJSONObject("updatedDates")
+                        if (datesObj != null) {
+                            val dKeys = datesObj.keys()
+                            while (dKeys.hasNext()) {
+                                val dk = dKeys.next()
+                                val dv = datesObj.optString(dk)
+                                if (dv.isNotBlank()) datesMap[dk] = dv
+                            }
                         }
-                    }
 
-                    return@withContext LiveForecourtDetails(
-                        slug = slug,
-                        prices = pricesMap,
-                        fuelUpdatedDates = datesMap,
-                        latestUpdated = json.optString("latestUpdated", "")
-                    )
+                        return@withContext LiveForecourtDetails(
+                            slug = slug,
+                            prices = pricesMap,
+                            fuelUpdatedDates = datesMap,
+                            latestUpdated = json.optString("latestUpdated", "")
+                        )
+                    }
                 }
             }
         } catch (_: Exception) {
@@ -269,7 +271,14 @@ object PetrolMapApiClient {
                 .trim()
 
             if (cleaned.contains("T")) {
-                return java.time.Instant.parse(cleaned).toEpochMilli()
+                val isoCleaned = if (cleaned.endsWith("Z")) cleaned.substring(0, cleaned.length - 1) else cleaned
+                val format = if (isoCleaned.contains(".")) {
+                    java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", java.util.Locale.US)
+                } else {
+                    java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.US)
+                }
+                format.timeZone = java.util.TimeZone.getTimeZone("UTC")
+                return format.parse(isoCleaned)?.time ?: 0L
             }
 
             val regex = Regex("(\\d{1,2})/(\\d{1,2})/(\\d{2,4})(?:\\s+(\\d{1,2}):(\\d{2})(?::(\\d{2}))?)?")
@@ -277,13 +286,16 @@ object PetrolMapApiClient {
             if (match != null) {
                 val (d, m, y) = match.destructured
                 val day = d.toInt()
-                val month = m.toInt()
+                val month = m.toInt() - 1
                 val year = if (y.length == 2) 2000 + y.toInt() else y.toInt()
                 val hour = match.groupValues.getOrNull(4)?.takeIf { it.isNotBlank() }?.toIntOrNull() ?: 0
                 val min = match.groupValues.getOrNull(5)?.takeIf { it.isNotBlank() }?.toIntOrNull() ?: 0
                 val sec = match.groupValues.getOrNull(6)?.takeIf { it.isNotBlank() }?.toIntOrNull() ?: 0
-                val ldt = java.time.LocalDateTime.of(year, month, day, hour, min, sec)
-                return ldt.toEpochSecond(java.time.ZoneOffset.UTC) * 1000L
+
+                val calendar = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"))
+                calendar.set(year, month, day, hour, min, sec)
+                calendar.set(java.util.Calendar.MILLISECOND, 0)
+                return calendar.timeInMillis
             }
         } catch (_: Exception) {}
         return 0L

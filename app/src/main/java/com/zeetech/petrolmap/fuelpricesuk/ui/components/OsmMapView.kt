@@ -11,6 +11,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -54,8 +55,13 @@ fun OsmMapView(
 
     var isUserInteracting by remember { mutableStateOf(false) }
 
+    val currentOnMapMoved by rememberUpdatedState(onMapMoved)
+    val currentOnMapReady by rememberUpdatedState(onMapReady)
+
     val mapView = remember {
         Configuration.getInstance().userAgentValue = context.packageName
+        Configuration.getInstance().tileFileSystemCacheMaxBytes = 100L * 1024 * 1024 // 100 MB max
+        Configuration.getInstance().tileFileSystemCacheTrimBytes = 80L * 1024 * 1024 // trim to 80 MB
         MapView(context).apply {
             setTileSource(TileSourceFactory.MAPNIK)
             zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
@@ -76,7 +82,7 @@ fun OsmMapView(
                 override fun onScroll(event: ScrollEvent?): Boolean {
                     val center = mapCenter
                     if (center != null && isUserInteracting) {
-                        onMapMoved?.invoke(center.latitude, center.longitude, false)
+                        currentOnMapMoved?.invoke(center.latitude, center.longitude, false)
                     }
                     return true
                 }
@@ -84,13 +90,13 @@ fun OsmMapView(
                 override fun onZoom(event: ZoomEvent?): Boolean {
                     val center = mapCenter
                     if (center != null && isUserInteracting) {
-                        onMapMoved?.invoke(center.latitude, center.longitude, true)
+                        currentOnMapMoved?.invoke(center.latitude, center.longitude, true)
                     }
                     return true
                 }
             })
 
-            onMapReady?.invoke(this)
+            currentOnMapReady?.invoke(this)
         }
     }
 

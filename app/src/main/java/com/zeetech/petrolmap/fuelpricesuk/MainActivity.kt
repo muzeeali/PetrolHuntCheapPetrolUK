@@ -15,6 +15,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -139,6 +144,8 @@ fun PetrolMapApp() {
     var isOffline by remember { mutableStateOf(false) }
     var isOutsideUk by remember { mutableStateOf(false) }
     var mapDebounceJob by remember { mutableStateOf<Job?>(null) }
+    var showLocationDisclosureDialog by remember { mutableStateOf(false) }
+    var showNotificationDisclosureDialog by remember { mutableStateOf(false) }
 
     // Screen Overlays / Dialogs
     val activity = context as? Activity
@@ -353,13 +360,15 @@ fun PetrolMapApp() {
     // Notification Permission Launcher (Android 13+)
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
-    ) { _ ->
-        prefs.hasPromptedLocation = true
-        showFirstLaunch = false
-        showSearchScreen = true
+    ) { isGranted ->
+        prefs.fuelAlertsEnabled = isGranted
+        if (isGranted) {
+            com.google.firebase.messaging.FirebaseMessaging.getInstance()
+                .subscribeToTopic(com.zeetech.petrolmap.fuelpricesuk.services.PetrolFirebaseMessagingService.TOPIC_UK_FUEL_ALERTS)
+        }
     }
 
-    // Permission Launcher: Handles Location + Android 13+ Notification permissions
+    // Permission Launcher: Handles Location permissions
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
@@ -387,16 +396,22 @@ fun PetrolMapApp() {
             }
             fetchStations()
         }
+
+        // Prompt notification permission with disclosure on Android 13+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !LocationHelper.hasNotificationPermission(context)) {
+            showNotificationDisclosureDialog = true
+        } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            prefs.fuelAlertsEnabled = true
+            com.google.firebase.messaging.FirebaseMessaging.getInstance()
+                .subscribeToTopic(com.zeetech.petrolmap.fuelpricesuk.services.PetrolFirebaseMessagingService.TOPIC_UK_FUEL_ALERTS)
+        }
     }
 
-    fun launchAllPermissions() {
-        val perms = buildList {
-            add(Manifest.permission.ACCESS_FINE_LOCATION)
-            add(Manifest.permission.ACCESS_COARSE_LOCATION)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                add(Manifest.permission.POST_NOTIFICATIONS)
-            }
-        }.toTypedArray()
+    fun launchLocationPermission() {
+        val perms = arrayOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        )
         locationPermissionLauncher.launch(perms)
     }
 
@@ -424,7 +439,7 @@ fun PetrolMapApp() {
             if (isPermanentlyDenied) {
                 showLocationPermissionDialog = true
             } else {
-                launchAllPermissions()
+                showLocationDisclosureDialog = true
             }
         }
     }
@@ -455,6 +470,7 @@ fun PetrolMapApp() {
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose {
+            mapDebounceJob?.cancel()
             inAppUpdateManager?.onDestroy()
             lifecycleOwner.lifecycle.removeObserver(observer)
         }
@@ -506,15 +522,18 @@ fun PetrolMapApp() {
     if (showFirstLaunch) {
         FirstLaunchLocationScreen(
             onRequestLocation = {
-                launchAllPermissions()
+                launchLocationPermission()
             },
             onSearchManually = {
+                prefs.hasPromptedLocation = true
+                showFirstLaunch = false
+                showSearchScreen = true
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !LocationHelper.hasNotificationPermission(context)) {
-                    notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                } else {
-                    prefs.hasPromptedLocation = true
-                    showFirstLaunch = false
-                    showSearchScreen = true
+                    showNotificationDisclosureDialog = true
+                } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                    prefs.fuelAlertsEnabled = true
+                    com.google.firebase.messaging.FirebaseMessaging.getInstance()
+                        .subscribeToTopic(com.zeetech.petrolmap.fuelpricesuk.services.PetrolFirebaseMessagingService.TOPIC_UK_FUEL_ALERTS)
                 }
             }
         )
@@ -749,7 +768,8 @@ fun PetrolMapApp() {
                             recentSearches = emptyList()
                             stations = emptyList()
                             lastUpdatedTime = null
-                        }
+                        },
+                        prefs = prefs
                     )
                 }
             }
@@ -917,6 +937,128 @@ fun PetrolMapApp() {
                     }
                 ) {
                     Text("Cancel", color = PetrolSecondaryText)
+                }
+            },
+            containerColor = PetrolSurfaceElevated,
+            shape = RoundedCornerShape(20.dp)
+        )
+    }
+
+    // Prominent Location Disclosure Dialog (Google Play Policy Compliance)
+    if (showLocationDisclosureDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showLocationDisclosureDialog = false
+                isGpsRequestedByUser = false
+            },
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.MyLocation,
+                    contentDescription = null,
+                    tint = PetrolBrandGreen,
+                    modifier = Modifier.size(28.dp)
+                )
+            },
+            title = {
+                Text(
+                    text = "Location Access Disclosure",
+                    color = PetrolPrimaryText,
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text(
+                    text = "Petrol Map accesses device location data (approximate and precise) while the app is in use to find nearby petrol stations, calculate driving distances, and show live pump prices.\n\nYour location data is processed locally on your device in real time, is never stored on our servers, and is never tracked in the background.",
+                    color = PetrolSecondaryText,
+                    fontSize = 13.5.sp,
+                    lineHeight = 19.sp
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showLocationDisclosureDialog = false
+                        launchLocationPermission()
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = PetrolBrandGreen,
+                        contentColor = PetrolBackground
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("Agree & Continue", fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showLocationDisclosureDialog = false
+                        isGpsRequestedByUser = false
+                    }
+                ) {
+                    Text("Not Now", color = PetrolSecondaryText)
+                }
+            },
+            containerColor = PetrolSurfaceElevated,
+            shape = RoundedCornerShape(20.dp)
+        )
+    }
+
+    // Prominent Notification Permission Disclosure Dialog (Google Play Policy Compliance)
+    if (showNotificationDisclosureDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showNotificationDisclosureDialog = false
+            },
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.Notifications,
+                    contentDescription = null,
+                    tint = PetrolBrandGreen,
+                    modifier = Modifier.size(28.dp)
+                )
+            },
+            title = {
+                Text(
+                    text = "Fuel Price Drop Alerts",
+                    color = PetrolPrimaryText,
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text(
+                    text = "Allow notifications to receive timely alerts when petrol and diesel prices drop in your area and get notified of cheap fuel near you.\n\nYou can turn off alerts at any time in Settings.",
+                    color = PetrolSecondaryText,
+                    fontSize = 13.5.sp,
+                    lineHeight = 19.sp
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showNotificationDisclosureDialog = false
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = PetrolBrandGreen,
+                        contentColor = PetrolBackground
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("Enable Alerts", fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showNotificationDisclosureDialog = false
+                    }
+                ) {
+                    Text("Not Now", color = PetrolSecondaryText)
                 }
             },
             containerColor = PetrolSurfaceElevated,

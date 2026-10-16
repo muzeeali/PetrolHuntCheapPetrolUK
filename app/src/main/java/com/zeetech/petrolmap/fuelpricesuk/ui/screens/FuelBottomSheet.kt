@@ -98,7 +98,7 @@ fun FuelBottomSheet(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                FuelType.values().forEach { fuel ->
+                FuelType.entries.forEach { fuel ->
                     val isSelected = fuel == currentFuel
                     val dotColor = when (fuel) {
                         FuelType.E10, FuelType.E5 -> PetrolBrandGreen

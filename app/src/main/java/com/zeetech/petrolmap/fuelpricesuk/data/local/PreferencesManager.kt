@@ -43,6 +43,10 @@ class PreferencesManager(context: Context) {
         get() = prefs.getBoolean("has_prompted_location", false)
         set(value) = prefs.edit().putBoolean("has_prompted_location", value).apply()
 
+    var fuelAlertsEnabled: Boolean
+        get() = prefs.getBoolean("fuel_alerts_enabled", false)
+        set(value) = prefs.edit().putBoolean("fuel_alerts_enabled", value).apply()
+
     var firstLaunchTimestamp: Long
         get() {
             var ts = prefs.getLong("first_launch_ts", 0L)

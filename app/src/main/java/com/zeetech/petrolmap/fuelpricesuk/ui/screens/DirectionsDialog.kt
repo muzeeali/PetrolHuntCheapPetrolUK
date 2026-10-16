@@ -112,7 +112,7 @@ fun DirectionsDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                NavigationApp.values().forEach { app ->
+                NavigationApp.entries.forEach { app ->
                     val isSelected = app == selectedNavApp
 
                     Row(
@@ -203,18 +203,17 @@ fun launchNavigation(context: Context, station: Station, app: NavigationApp) {
 
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
-        // Try direct launch
-        if (intent.resolveActivity(context.packageManager) != null) {
+        try {
             context.startActivity(intent)
-        } else {
+        } catch (_: android.content.ActivityNotFoundException) {
             // Fallback to generic geo URI
             val fallbackUri = Uri.parse("geo:$lat,$lng?q=$lat,$lng($label)")
             val fallbackIntent = Intent(Intent.ACTION_VIEW, fallbackUri).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
-            if (fallbackIntent.resolveActivity(context.packageManager) != null) {
+            try {
                 context.startActivity(fallbackIntent)
-            } else {
+            } catch (_: android.content.ActivityNotFoundException) {
                 // Fallback to web browser Google Maps
                 val webUri = Uri.parse("https://www.google.com/maps/dir/?api=1&destination=$lat,$lng")
                 val webIntent = Intent(Intent.ACTION_VIEW, webUri).apply {

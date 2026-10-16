@@ -146,16 +146,31 @@ object LocationHelper {
         val freshLocation = try {
             withTimeoutOrNull(4500) {
                 suspendCancellableCoroutine<Location?> { continuation ->
-                    var isCompleted = false
+                    val isCompleted = java.util.concurrent.atomic.AtomicBoolean(false)
                     val fusedClient = LocationServices.getFusedLocationProviderClient(context)
                     val cts = CancellationTokenSource()
+                    val listeners = java.util.Collections.synchronizedList(mutableListOf<LocationListener>())
+
+                    fun cleanup() {
+                        cts.cancel()
+                        if (lm != null) {
+                            synchronized(listeners) {
+                                for (l in listeners) {
+                                    try { lm.removeUpdates(l) } catch (_: Exception) {}
+                                }
+                                listeners.clear()
+                            }
+                        }
+                    }
 
                     // A. Fused Client High Accuracy request
                     fusedClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, cts.token)
                         .addOnSuccessListener { loc ->
-                            if (!isCompleted && loc != null && continuation.isActive) {
-                                isCompleted = true
-                                continuation.resume(loc)
+                            if (isCompleted.compareAndSet(false, true)) {
+                                cleanup()
+                                if (continuation.isActive) {
+                                    continuation.resume(loc)
+                                }
                             }
                         }
                         .addOnFailureListener {
@@ -163,7 +178,6 @@ object LocationHelper {
                         }
 
                     // B. Native LocationManager concurrent listeners (Network + GPS)
-                    val listeners = mutableListOf<LocationListener>()
                     if (lm != null) {
                         val activeProviders = mutableListOf<String>()
                         if (lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) activeProviders.add(LocationManager.NETWORK_PROVIDER)
@@ -172,9 +186,11 @@ object LocationHelper {
                         for (prov in activeProviders) {
                             val listener = object : LocationListener {
                                 override fun onLocationChanged(location: Location) {
-                                    if (!isCompleted && continuation.isActive) {
-                                        isCompleted = true
-                                        continuation.resume(location)
+                                    if (isCompleted.compareAndSet(false, true)) {
+                                        cleanup()
+                                        if (continuation.isActive) {
+                                            continuation.resume(location)
+                                        }
                                     }
                                 }
                                 @Deprecated("Deprecated in Java")
@@ -192,12 +208,7 @@ object LocationHelper {
                     }
 
                     continuation.invokeOnCancellation {
-                        cts.cancel()
-                        if (lm != null) {
-                            for (l in listeners) {
-                                try { lm.removeUpdates(l) } catch (e: Exception) {}
-                            }
-                        }
+                        cleanup()
                     }
                 }
             }

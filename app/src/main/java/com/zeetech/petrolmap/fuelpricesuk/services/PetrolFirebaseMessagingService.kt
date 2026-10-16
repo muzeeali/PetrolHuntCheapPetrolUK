@@ -19,13 +19,15 @@ class PetrolFirebaseMessagingService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
         super.onNewToken(token)
         Log.d(TAG, "Refreshed FCM token: $token")
-        // Subscribe to general UK fuel price alerts topic
-        FirebaseMessaging.getInstance().subscribeToTopic(TOPIC_UK_FUEL_ALERTS)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    Log.d(TAG, "Subscribed to $TOPIC_UK_FUEL_ALERTS topic")
+        // Only auto-subscribe if the user has opted in to fuel alerts
+        if (com.zeetech.petrolmap.fuelpricesuk.data.local.PreferencesManager(applicationContext).fuelAlertsEnabled) {
+            FirebaseMessaging.getInstance().subscribeToTopic(TOPIC_UK_FUEL_ALERTS)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        Log.d(TAG, "Subscribed to $TOPIC_UK_FUEL_ALERTS topic")
+                    }
                 }
-            }
+        }
     }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
@@ -73,14 +75,15 @@ class PetrolFirebaseMessagingService : FirebaseMessagingService() {
         }
 
         val notificationBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(title)
             .setContentText(messageBody)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setContentIntent(pendingIntent)
 
-        notificationManager.notify(System.currentTimeMillis().toInt(), notificationBuilder.build())
+        val notificationId = (System.currentTimeMillis() % 100000).toInt()
+        notificationManager.notify(notificationId, notificationBuilder.build())
     }
 
     companion object {

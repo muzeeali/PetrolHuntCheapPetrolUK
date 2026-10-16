@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Sort
+import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.RadioButton
@@ -66,7 +66,7 @@ fun SortBottomSheet(
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
-                            imageVector = Icons.Default.Sort,
+                            imageVector = Icons.AutoMirrored.Filled.Sort,
                             contentDescription = null,
                             tint = PetrolBrandGreen,
                             modifier = Modifier.size(22.dp)
@@ -95,7 +95,7 @@ fun SortBottomSheet(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                SortMode.values().forEach { mode ->
+                SortMode.entries.forEach { mode ->
                     val isSelected = mode == currentSort
 
                     Row(

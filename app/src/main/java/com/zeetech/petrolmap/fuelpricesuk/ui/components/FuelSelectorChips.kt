@@ -40,7 +40,7 @@ fun FuelSelectorChips(
             .padding(horizontal = 2.dp),
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        FuelType.values().forEach { fuel ->
+        FuelType.entries.forEach { fuel ->
             val isSelected = fuel == selectedFuel
             val shape = RoundedCornerShape(20.dp)
 

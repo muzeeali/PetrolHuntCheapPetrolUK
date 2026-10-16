@@ -83,30 +83,31 @@ object UKGeocodingHelper {
                 val url = "https://api.postcodes.io/postcodes/${cleanPostcode}"
                 val request = Request.Builder()
                     .url(url)
-                    .header("User-Agent", "PetrolMapUK/1.3")
+                    .header("User-Agent", "PetrolMapUK/${com.zeetech.petrolmap.fuelpricesuk.BuildConfig.VERSION_NAME}")
                     .build()
-                val response = client.newCall(request).execute()
-                if (response.isSuccessful) {
-                    val body = response.body?.string()
-                    if (body != null) {
-                        val json = JSONObject(body)
-                        if (json.optInt("status") == 200 && json.has("result")) {
-                            val res = json.getJSONObject("result")
-                            val post = res.optString("postcode", clean)
-                            val adminDistrict = res.optString("admin_district", "UK")
-                            val region = res.optString("region", "")
-                            val lat = res.getDouble("latitude")
-                            val lng = res.getDouble("longitude")
+                client.newCall(request).execute().use { response ->
+                    if (response.isSuccessful) {
+                        val body = response.body?.string()
+                        if (body != null) {
+                            val json = JSONObject(body)
+                            if (json.optInt("status") == 200 && json.has("result")) {
+                                val res = json.getJSONObject("result")
+                                val post = res.optString("postcode", clean)
+                                val adminDistrict = res.optString("admin_district", "UK")
+                                val region = res.optString("region", "")
+                                val lat = res.getDouble("latitude")
+                                val lng = res.getDouble("longitude")
 
-                            val loc = SearchLocation(
-                                name = post,
-                                subtitle = "$adminDistrict, $region",
-                                latitude = lat,
-                                longitude = lng,
-                                isUk = true
-                            )
-                            if (results.none { it.name.equals(post, ignoreCase = true) }) {
-                                results.add(0, loc)
+                                val loc = SearchLocation(
+                                    name = post,
+                                    subtitle = "$adminDistrict, $region",
+                                    latitude = lat,
+                                    longitude = lng,
+                                    isUk = true
+                                )
+                                if (results.none { it.name.equals(post, ignoreCase = true) }) {
+                                    results.add(0, loc)
+                                }
                             }
                         }
                     }
@@ -122,39 +123,40 @@ object UKGeocodingHelper {
             val url = "https://nominatim.openstreetmap.org/search?q=$encoded&format=json&limit=8"
             val request = Request.Builder()
                 .url(url)
-                .header("User-Agent", "PetrolMapUK/1.3")
+                .header("User-Agent", "PetrolMapUK/${com.zeetech.petrolmap.fuelpricesuk.BuildConfig.VERSION_NAME}")
                 .build()
-            val response = client.newCall(request).execute()
-            if (response.isSuccessful) {
-                val body = response.body?.string()
-                if (body != null) {
-                    val array = JSONArray(body)
-                    for (i in 0 until array.length()) {
-                        val item = array.getJSONObject(i)
-                        val name = item.optString("name", item.optString("display_name").split(",").firstOrNull() ?: clean)
-                        val displayName = item.optString("display_name", "")
-                        val lat = item.getDouble("lat")
-                        val lng = item.getDouble("lon")
+            client.newCall(request).execute().use { response ->
+                if (response.isSuccessful) {
+                    val body = response.body?.string()
+                    if (body != null) {
+                        val array = JSONArray(body)
+                        for (i in 0 until array.length()) {
+                            val item = array.getJSONObject(i)
+                            val name = item.optString("name", item.optString("display_name").split(",").firstOrNull() ?: clean)
+                            val displayName = item.optString("display_name", "")
+                            val lat = item.getDouble("lat")
+                            val lng = item.getDouble("lon")
 
-                        val inUk = isInsideUk(lat, lng) || displayName.contains("United Kingdom", ignoreCase = true)
-                        val subtitle = if (inUk) {
-                            displayName.split(",").drop(1).take(2).joinToString(",").trim()
-                        } else {
-                            val parts = displayName.split(",")
-                            val country = parts.lastOrNull()?.trim() ?: "International"
-                            "$country · Outside UK"
-                        }
+                            val inUk = isInsideUk(lat, lng) || displayName.contains("United Kingdom", ignoreCase = true)
+                            val subtitle = if (inUk) {
+                                displayName.split(",").drop(1).take(2).joinToString(",").trim()
+                            } else {
+                                val parts = displayName.split(",")
+                                val country = parts.lastOrNull()?.trim() ?: "International"
+                                "$country · Outside UK"
+                            }
 
-                        val loc = SearchLocation(
-                            name = name,
-                            subtitle = subtitle,
-                            latitude = lat,
-                            longitude = lng,
-                            isUk = inUk
-                        )
+                            val loc = SearchLocation(
+                                name = name,
+                                subtitle = subtitle,
+                                latitude = lat,
+                                longitude = lng,
+                                isUk = inUk
+                            )
 
-                        if (results.none { it.name.equals(loc.name, ignoreCase = true) && Math.abs(it.latitude - loc.latitude) < 0.05 }) {
-                            results.add(loc)
+                            if (results.none { it.name.equals(loc.name, ignoreCase = true) && Math.abs(it.latitude - loc.latitude) < 0.05 }) {
+                                results.add(loc)
+                            }
                         }
                     }
                 }

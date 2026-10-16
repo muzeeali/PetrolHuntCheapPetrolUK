@@ -20,9 +20,11 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.remoteConfig
 import com.google.firebase.remoteconfig.remoteConfigSettings
 
-class InAppUpdateManager(private val activity: Activity) {
+class InAppUpdateManager(activity: Activity) {
 
-    private val appUpdateManager: AppUpdateManager = AppUpdateManagerFactory.create(activity)
+    private var activityRef: java.lang.ref.WeakReference<Activity>? = java.lang.ref.WeakReference(activity)
+    private val currentActivity: Activity? get() = activityRef?.get()
+    private val appUpdateManager: AppUpdateManager = AppUpdateManagerFactory.create(activity.applicationContext)
     private var installStateUpdatedListener: InstallStateUpdatedListener? = null
     var onFlexibleUpdateDownloaded: (() -> Unit)? = null
 
@@ -85,10 +87,11 @@ class InAppUpdateManager(private val activity: Activity) {
     }
 
     private fun startImmediateUpdate(appUpdateInfo: AppUpdateInfo) {
+        val act = currentActivity ?: return
         try {
             appUpdateManager.startUpdateFlow(
                 appUpdateInfo,
-                activity,
+                act,
                 AppUpdateOptions.defaultOptions(AppUpdateType.IMMEDIATE)
             )
             Firebase.analytics.logEvent("app_update_started") {
@@ -101,11 +104,12 @@ class InAppUpdateManager(private val activity: Activity) {
     }
 
     private fun startFlexibleUpdate(appUpdateInfo: AppUpdateInfo) {
+        val act = currentActivity ?: return
         registerInstallListener()
         try {
             appUpdateManager.startUpdateFlow(
                 appUpdateInfo,
-                activity,
+                act,
                 AppUpdateOptions.defaultOptions(AppUpdateType.FLEXIBLE)
             )
             Firebase.analytics.logEvent("app_update_started") {
@@ -135,13 +139,14 @@ class InAppUpdateManager(private val activity: Activity) {
     }
 
     fun onResumeCheck() {
+        val act = currentActivity ?: return
         appUpdateManager.appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
             if (appUpdateInfo.updateAvailability() == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS) {
                 // Resume ongoing immediate update
                 try {
                     appUpdateManager.startUpdateFlow(
                         appUpdateInfo,
-                        activity,
+                        act,
                         AppUpdateOptions.defaultOptions(AppUpdateType.IMMEDIATE)
                     )
                 } catch (e: Exception) {
@@ -157,7 +162,11 @@ class InAppUpdateManager(private val activity: Activity) {
     fun onDestroy() {
         installStateUpdatedListener?.let {
             appUpdateManager.unregisterListener(it)
+            installStateUpdatedListener = null
         }
+        onFlexibleUpdateDownloaded = null
+        activityRef?.clear()
+        activityRef = null
     }
 
     companion object {
