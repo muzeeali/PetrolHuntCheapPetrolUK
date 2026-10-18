@@ -117,26 +117,18 @@ fun SettingsScreen(
     ) {
         Spacer(modifier = Modifier.height(14.dp))
 
-        // Header Title
+        // Header Title & Sync Active in a single row
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
-                Text(
-                    text = "Settings",
-                    color = PetrolPrimaryText,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "Customise your fuel preferences & app settings",
-                    color = PetrolSecondaryText,
-                    fontSize = 12.sp
-                )
-            }
-
+            Text(
+                text = "Settings",
+                color = PetrolPrimaryText,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold
+            )
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(12.dp))
@@ -161,6 +153,12 @@ fun SettingsScreen(
                 }
             }
         }
+        Spacer(modifier = Modifier.height(2.dp))
+        Text(
+            text = "Customise your fuel preferences & app settings",
+            color = PetrolSecondaryText,
+            fontSize = 12.sp
+        )
 
         Spacer(modifier = Modifier.height(14.dp))
 
