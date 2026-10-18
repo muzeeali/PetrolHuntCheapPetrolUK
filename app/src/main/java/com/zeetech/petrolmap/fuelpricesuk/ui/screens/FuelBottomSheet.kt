@@ -41,6 +41,7 @@ import com.zeetech.petrolmap.fuelpricesuk.ui.theme.PetrolMutedText
 import com.zeetech.petrolmap.fuelpricesuk.ui.theme.PetrolPrimaryText
 import com.zeetech.petrolmap.fuelpricesuk.ui.theme.PetrolSecondaryText
 import com.zeetech.petrolmap.fuelpricesuk.ui.theme.PetrolSurfaceElevated
+import com.zeetech.petrolmap.fuelpricesuk.ui.theme.applePressEffect
 
 @Composable
 fun FuelBottomSheet(
@@ -113,7 +114,7 @@ fun FuelBottomSheet(
                             .clip(RoundedCornerShape(12.dp))
                             .background(if (isSelected) PetrolSurfaceElevated else PetrolBackground)
                             .border(1.dp, if (isSelected) PetrolBrandGreen else PetrolBorder, RoundedCornerShape(12.dp))
-                            .clickable {
+                            .applePressEffect(scaleOnPress = 0.97f) {
                                 onFuelSelected(fuel)
                                 onDismiss()
                             }

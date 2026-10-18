@@ -53,6 +53,7 @@ import com.zeetech.petrolmap.fuelpricesuk.ui.theme.PetrolPrimaryText
 import com.zeetech.petrolmap.fuelpricesuk.ui.theme.PetrolSecondaryText
 import com.zeetech.petrolmap.fuelpricesuk.ui.theme.PetrolSurface
 import com.zeetech.petrolmap.fuelpricesuk.ui.theme.PetrolSurfaceElevated
+import com.zeetech.petrolmap.fuelpricesuk.ui.theme.applePressEffect
 
 /**
  * Top header bar component containing the location search input, radius filter,
@@ -82,8 +83,8 @@ fun TopHeaderBar(
 
     Surface(
         modifier = modifier.fillMaxWidth(),
-        color = PetrolSurface,
-        shadowElevation = 3.dp
+        color = PetrolSurface.copy(alpha = 0.95f),
+        shadowElevation = 4.dp
     ) {
         Column(
             modifier = Modifier
@@ -102,10 +103,10 @@ fun TopHeaderBar(
                     modifier = Modifier
                         .weight(1f)
                         .height(38.dp)
-                        .clip(RoundedCornerShape(10.dp))
+                        .clip(RoundedCornerShape(12.dp))
                         .background(PetrolBackground)
-                        .border(1.dp, PetrolBorder, RoundedCornerShape(10.dp))
-                        .clickable { onSearchClick() }
+                        .border(1.dp, PetrolBorder, RoundedCornerShape(12.dp))
+                        .applePressEffect(scaleOnPress = 0.98f, onClick = onSearchClick)
                         .padding(horizontal = 10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -145,10 +146,10 @@ fun TopHeaderBar(
                     Row(
                         modifier = Modifier
                             .height(38.dp)
-                            .clip(RoundedCornerShape(10.dp))
+                            .clip(RoundedCornerShape(12.dp))
                             .background(PetrolBackground)
-                            .border(1.dp, PetrolBorder, RoundedCornerShape(10.dp))
-                            .clickable { isDistanceMenuOpen = true }
+                            .border(1.dp, PetrolBorder, RoundedCornerShape(12.dp))
+                            .applePressEffect(scaleOnPress = 0.96f) { isDistanceMenuOpen = true }
                             .padding(horizontal = 9.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -218,10 +219,10 @@ fun TopHeaderBar(
                     Row(
                         modifier = Modifier
                             .height(38.dp)
-                            .clip(RoundedCornerShape(10.dp))
+                            .clip(RoundedCornerShape(12.dp))
                             .background(PetrolBackground)
-                            .border(1.dp, PetrolBorder, RoundedCornerShape(10.dp))
-                            .clickable { isFuelMenuOpen = true }
+                            .border(1.dp, PetrolBorder, RoundedCornerShape(12.dp))
+                            .applePressEffect(scaleOnPress = 0.96f) { isFuelMenuOpen = true }
                             .padding(horizontal = 9.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -295,13 +296,14 @@ fun TopHeaderBar(
                 }
 
                 // (d) Quick Refresh Button
-                IconButton(
-                    onClick = onRefreshClick,
+                Box(
                     modifier = Modifier
                         .size(38.dp)
-                        .clip(RoundedCornerShape(10.dp))
+                        .clip(RoundedCornerShape(12.dp))
                         .background(PetrolBackground)
-                        .border(1.dp, PetrolBorder, RoundedCornerShape(10.dp))
+                        .border(1.dp, PetrolBorder, RoundedCornerShape(12.dp))
+                        .applePressEffect(scaleOnPress = 0.92f, onClick = onRefreshClick),
+                    contentAlignment = Alignment.Center
                 ) {
                     if (isRefreshing) {
                         CircularProgressIndicator(

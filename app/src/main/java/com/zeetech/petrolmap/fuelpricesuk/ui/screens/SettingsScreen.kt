@@ -62,6 +62,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.zeetech.petrolmap.fuelpricesuk.data.location.NavigationHelper
+import com.zeetech.petrolmap.fuelpricesuk.ui.theme.applePressEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -302,7 +303,7 @@ fun SettingsScreen(
                                 .clip(RoundedCornerShape(10.dp))
                                 .background(if (isSelected) PetrolBrandGreen else PetrolSurface)
                                 .border(1.dp, if (isSelected) PetrolBrandGreen else PetrolBorder, RoundedCornerShape(10.dp))
-                                .clickable { onNavAppChanged(app) }
+                                .applePressEffect(scaleOnPress = 0.95f) { onNavAppChanged(app) }
                                 .padding(vertical = 10.dp),
                             contentAlignment = Alignment.Center
                         ) {
@@ -326,7 +327,7 @@ fun SettingsScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(10.dp))
-                        .clickable {
+                        .applePressEffect(scaleOnPress = 0.99f) {
                             val newVal = !rememberChoice
                             rememberChoice = newVal
                             effectivePrefs.rememberNavigationAppChoice = newVal
@@ -660,8 +661,8 @@ private fun SettingsGroup(content: @Composable () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = PetrolSurfaceElevated),
-        shape = RoundedCornerShape(14.dp),
-        border = CardDefaults.outlinedCardBorder().copy(brush = androidx.compose.ui.graphics.SolidColor(PetrolBorder))
+        shape = RoundedCornerShape(16.dp),
+        border = CardDefaults.outlinedCardBorder().copy(brush = androidx.compose.ui.graphics.SolidColor(PetrolBorder.copy(alpha = 0.8f)))
     ) {
         Column(modifier = Modifier.padding(horizontal = 14.dp)) {
             content()
@@ -681,7 +682,7 @@ private fun SettingsRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() }
+            .applePressEffect(scaleOnPress = 0.99f, onClick = onClick)
             .padding(vertical = 14.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
@@ -723,8 +724,9 @@ private fun SettingsRow(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(1.dp)
-                .background(PetrolBorder)
+                .padding(start = 30.dp)
+                .height(0.6.dp)
+                .background(PetrolBorder.copy(alpha = 0.7f))
         )
     }
 }

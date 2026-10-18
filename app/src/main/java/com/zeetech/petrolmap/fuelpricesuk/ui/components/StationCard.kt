@@ -34,6 +34,9 @@ import com.zeetech.petrolmap.fuelpricesuk.ui.theme.PetrolPrimaryText
 import com.zeetech.petrolmap.fuelpricesuk.ui.theme.PetrolSecondaryText
 import com.zeetech.petrolmap.fuelpricesuk.ui.theme.PetrolSurfaceElevated
 
+import com.zeetech.petrolmap.fuelpricesuk.ui.theme.AppleMotion
+import com.zeetech.petrolmap.fuelpricesuk.ui.theme.applePressEffect
+
 @Composable
 fun StationCard(
     modifier: Modifier = Modifier,
@@ -42,7 +45,7 @@ fun StationCard(
     isSelected: Boolean = false,
     onClick: () -> Unit
 ) {
-    val shape = RoundedCornerShape(14.dp)
+    val shape = RoundedCornerShape(16.dp)
 
     Row(
         modifier = modifier
@@ -51,11 +54,11 @@ fun StationCard(
             .background(PetrolSurfaceElevated)
             .border(
                 width = if (isSelected) 1.5.dp else 1.dp,
-                color = if (isSelected) PetrolBrandGreen else PetrolBorder,
+                color = if (isSelected) PetrolBrandGreen else PetrolBorder.copy(alpha = 0.85f),
                 shape = shape
             )
-            .clickable { onClick() }
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+            .applePressEffect(scaleOnPress = 0.98f, onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 9.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Brand logo icon square
@@ -147,7 +150,8 @@ fun StationCard(
                     text = String.format(java.util.Locale.US, "%.1f", station.price),
                     color = if (isCheapest) PetrolBrandGreen else PetrolPrimaryText,
                     fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = AppleMotion.DisplayPriceTracking
                 )
                 Text(
                     text = "p",

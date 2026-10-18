@@ -44,6 +44,7 @@ import com.zeetech.petrolmap.fuelpricesuk.ui.theme.PetrolMutedText
 import com.zeetech.petrolmap.fuelpricesuk.ui.theme.PetrolPrimaryText
 import com.zeetech.petrolmap.fuelpricesuk.ui.theme.PetrolSecondaryText
 import com.zeetech.petrolmap.fuelpricesuk.ui.theme.PetrolSurfaceElevated
+import com.zeetech.petrolmap.fuelpricesuk.ui.theme.applePressEffect
 
 val RADIUS_OPTIONS = listOf(1, 3, 5, 10, 15, 25, 50)
 
@@ -60,8 +61,8 @@ fun FilterBottomSheet(
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(20.dp))
-                .border(1.dp, PetrolBorder, RoundedCornerShape(20.dp)),
+                .clip(RoundedCornerShape(22.dp))
+                .border(1.dp, PetrolBorder, RoundedCornerShape(22.dp)),
             color = PetrolBackground
         ) {
             Column(
@@ -124,7 +125,7 @@ fun FilterBottomSheet(
                                     if (isSelected) PetrolBrandGreen else PetrolBorder,
                                     shape
                                 )
-                                .clickable { selectedRadius = radius }
+                                .applePressEffect(scaleOnPress = 0.94f) { selectedRadius = radius }
                                 .padding(horizontal = 16.dp, vertical = 10.dp)
                         ) {
                             Text(
@@ -146,7 +147,9 @@ fun FilterBottomSheet(
                 ) {
                     TextButton(
                         onClick = { selectedRadius = 5 },
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier
+                            .weight(1f)
+                            .applePressEffect(scaleOnPress = 0.96f) { selectedRadius = 5 }
                     ) {
                         Text(
                             text = "Reset (5 mi)",
@@ -164,7 +167,8 @@ fun FilterBottomSheet(
                         },
                         modifier = Modifier
                             .weight(1.5f)
-                            .height(46.dp),
+                            .height(46.dp)
+                            .applePressEffect(scaleOnPress = 0.96f),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = PetrolBrandGreen,
                             contentColor = PetrolBackground

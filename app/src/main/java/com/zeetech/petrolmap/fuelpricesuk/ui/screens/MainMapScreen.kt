@@ -85,6 +85,7 @@ import com.zeetech.petrolmap.fuelpricesuk.ui.theme.PetrolPrimaryText
 import com.zeetech.petrolmap.fuelpricesuk.ui.theme.PetrolSecondaryText
 import com.zeetech.petrolmap.fuelpricesuk.ui.theme.PetrolSurface
 import com.zeetech.petrolmap.fuelpricesuk.ui.theme.PetrolSurfaceElevated
+import com.zeetech.petrolmap.fuelpricesuk.ui.theme.applePressEffect
 
 @Composable
 fun MainMapScreen(
@@ -142,12 +143,12 @@ fun MainMapScreen(
         val expandedSheetHeight = (availableHeight - 64.dp).coerceAtLeast(200.dp)
         val sheetHeight by animateDpAsState(
             targetValue = if (isSheetExpanded) expandedSheetHeight else collapsedSheetHeight,
-            animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+            animationSpec = spring(dampingRatio = 0.82f, stiffness = Spring.StiffnessMediumLow),
             label = "sheetHeight"
         )
         val floatingControlsOffset by animateDpAsState(
             targetValue = if (isSheetExpanded) (sheetHeight + 10.dp) else 88.dp,
-            animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+            animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow),
             label = "floatingControlsOffset"
         )
             // (a) OpenStreetMap View (Starts below top bars buttons row)
@@ -263,6 +264,7 @@ fun MainMapScreen(
                     .clip(CircleShape)
                     .background(PetrolSurfaceElevated)
                     .border(1.dp, PetrolBorder, CircleShape)
+                    .applePressEffect(scaleOnPress = 0.90f)
             ) {
                 Icon(
                     imageVector = Icons.Default.MyLocation,
@@ -364,7 +366,9 @@ fun MainMapScreen(
                         ),
                         shape = RoundedCornerShape(18.dp),
                         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 5.dp),
-                        modifier = Modifier.height(34.dp)
+                        modifier = Modifier
+                            .height(34.dp)
+                            .applePressEffect(scaleOnPress = 0.95f)
                     ) {
                         Text(
                             text = "${stations.size} Stations",

@@ -61,6 +61,7 @@ import com.zeetech.petrolmap.fuelpricesuk.ui.theme.PetrolPrimaryText
 import com.zeetech.petrolmap.fuelpricesuk.ui.theme.PetrolSecondaryText
 import com.zeetech.petrolmap.fuelpricesuk.ui.theme.PetrolSurface
 import com.zeetech.petrolmap.fuelpricesuk.ui.theme.PetrolSurfaceElevated
+import com.zeetech.petrolmap.fuelpricesuk.ui.theme.applePressEffect
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -212,7 +213,7 @@ fun SearchScreen(
                 .clip(RoundedCornerShape(14.dp))
                 .background(PetrolSurfaceElevated)
                 .border(1.dp, PetrolBorder, RoundedCornerShape(14.dp))
-                .clickable { onUseCurrentLocation() }
+                .applePressEffect(scaleOnPress = 0.98f, onClick = onUseCurrentLocation)
                 .padding(14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -368,7 +369,7 @@ fun SearchScreen(
                                     .clip(RoundedCornerShape(16.dp))
                                     .background(PetrolSurfaceElevated)
                                     .border(1.dp, PetrolBorder, RoundedCornerShape(16.dp))
-                                    .clickable { onSelectLocation(hub) }
+                                    .applePressEffect(scaleOnPress = 0.95f) { onSelectLocation(hub) }
                                     .padding(horizontal = 12.dp, vertical = 7.dp)
                             ) {
                                 Text(
@@ -436,7 +437,7 @@ private fun LocationResultRow(
             .clip(RoundedCornerShape(12.dp))
             .background(PetrolSurfaceElevated)
             .border(1.dp, PetrolBorder, RoundedCornerShape(12.dp))
-            .clickable { onClick() }
+            .applePressEffect(scaleOnPress = 0.98f, onClick = onClick)
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

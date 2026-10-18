@@ -65,6 +65,8 @@ import com.zeetech.petrolmap.fuelpricesuk.ui.theme.PetrolPrimaryText
 import com.zeetech.petrolmap.fuelpricesuk.ui.theme.PetrolSecondaryText
 import com.zeetech.petrolmap.fuelpricesuk.ui.theme.PetrolSurface
 import com.zeetech.petrolmap.fuelpricesuk.ui.theme.PetrolSurfaceElevated
+import com.zeetech.petrolmap.fuelpricesuk.ui.theme.AppleMotion
+import com.zeetech.petrolmap.fuelpricesuk.ui.theme.applePressEffect
 
 @Composable
 fun StationDetailDialog(
@@ -212,7 +214,8 @@ fun StationDetailDialog(
                                 text = String.format(java.util.Locale.US, "%.1f", activePrice),
                                 color = PetrolBrandGreen,
                                 fontSize = 38.sp,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = AppleMotion.DisplayLargeTracking
                             )
                             Text(
                                 text = " p/L",
@@ -399,7 +402,8 @@ fun StationDetailDialog(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(50.dp),
+                        .height(50.dp)
+                        .applePressEffect(scaleOnPress = 0.96f),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = PetrolBrandGreen,
                         contentColor = PetrolBackground
@@ -428,7 +432,8 @@ fun StationDetailDialog(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(46.dp),
+                        .height(46.dp)
+                        .applePressEffect(scaleOnPress = 0.96f),
                     colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = PetrolPrimaryText
                     ),

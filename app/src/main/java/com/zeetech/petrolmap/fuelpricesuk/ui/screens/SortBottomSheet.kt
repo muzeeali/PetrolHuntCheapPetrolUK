@@ -38,6 +38,7 @@ import com.zeetech.petrolmap.fuelpricesuk.ui.theme.PetrolMutedText
 import com.zeetech.petrolmap.fuelpricesuk.ui.theme.PetrolPrimaryText
 import com.zeetech.petrolmap.fuelpricesuk.ui.theme.PetrolSecondaryText
 import com.zeetech.petrolmap.fuelpricesuk.ui.theme.PetrolSurfaceElevated
+import com.zeetech.petrolmap.fuelpricesuk.ui.theme.applePressEffect
 
 @Composable
 fun SortBottomSheet(
@@ -49,8 +50,8 @@ fun SortBottomSheet(
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(20.dp))
-                .border(1.dp, PetrolBorder, RoundedCornerShape(20.dp)),
+                .clip(RoundedCornerShape(22.dp))
+                .border(1.dp, PetrolBorder, RoundedCornerShape(22.dp)),
             color = PetrolBackground
         ) {
             Column(
@@ -105,7 +106,7 @@ fun SortBottomSheet(
                             .clip(RoundedCornerShape(12.dp))
                             .background(if (isSelected) PetrolSurfaceElevated else PetrolBackground)
                             .border(1.dp, if (isSelected) PetrolBrandGreen else PetrolBorder, RoundedCornerShape(12.dp))
-                            .clickable {
+                            .applePressEffect(scaleOnPress = 0.97f) {
                                 onSortSelected(mode)
                                 onDismiss()
                             }

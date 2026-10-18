@@ -52,6 +52,7 @@ import com.zeetech.petrolmap.fuelpricesuk.ui.theme.PetrolMutedText
 import com.zeetech.petrolmap.fuelpricesuk.ui.theme.PetrolPrimaryText
 import com.zeetech.petrolmap.fuelpricesuk.ui.theme.PetrolSecondaryText
 import com.zeetech.petrolmap.fuelpricesuk.ui.theme.PetrolSurfaceElevated
+import com.zeetech.petrolmap.fuelpricesuk.ui.theme.applePressEffect
 
 @Composable
 fun DirectionsDialog(
@@ -133,7 +134,7 @@ fun DirectionsDialog(
                             .clip(RoundedCornerShape(12.dp))
                             .background(if (isSelected) PetrolSurfaceElevated else PetrolBackground)
                             .border(1.dp, if (isSelected) PetrolBrandGreen else PetrolBorder, RoundedCornerShape(12.dp))
-                            .clickable {
+                            .applePressEffect(scaleOnPress = 0.97f) {
                                 onNavAppChanged(app)
                                 onRememberChoiceChanged(rememberChoice)
                                 launchNavigation(context, station, app)
@@ -191,7 +192,7 @@ fun DirectionsDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(8.dp))
-                        .clickable { rememberChoice = !rememberChoice }
+                        .applePressEffect(scaleOnPress = 0.99f) { rememberChoice = !rememberChoice }
                         .padding(vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
