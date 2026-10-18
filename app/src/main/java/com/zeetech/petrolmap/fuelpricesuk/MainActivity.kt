@@ -996,7 +996,7 @@ fun PetrolMapApp() {
         DirectionsDialog(
             station = stationForDirections!!,
             selectedNavApp = navigationApp,
-            rememberChoiceInitial = prefs.rememberNavigationAppChoice,
+            rememberChoiceInitial = if (prefs.hasConfiguredNavigationAppChoice) prefs.rememberNavigationAppChoice else true,
             onNavAppChanged = { app ->
                 navigationApp = app
                 prefs.navigationApp = app

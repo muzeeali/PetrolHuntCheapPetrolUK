@@ -43,6 +43,9 @@ class PreferencesManager(context: Context) {
         get() = prefs.getBoolean("remember_nav_app_choice", false)
         set(value) = prefs.edit().putBoolean("remember_nav_app_choice", value).apply()
 
+    val hasConfiguredNavigationAppChoice: Boolean
+        get() = prefs.contains("remember_nav_app_choice")
+
     var hasPromptedLocation: Boolean
         get() = prefs.getBoolean("has_prompted_location", false)
         set(value) = prefs.edit().putBoolean("has_prompted_location", value).apply()

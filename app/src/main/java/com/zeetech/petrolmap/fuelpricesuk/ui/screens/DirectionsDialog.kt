@@ -58,7 +58,7 @@ import com.zeetech.petrolmap.fuelpricesuk.ui.theme.applePressEffect
 fun DirectionsDialog(
     station: Station,
     selectedNavApp: NavigationApp,
-    rememberChoiceInitial: Boolean = false,
+    rememberChoiceInitial: Boolean = true,
     onNavAppChanged: (NavigationApp) -> Unit,
     onRememberChoiceChanged: (Boolean) -> Unit = {},
     onDismiss: () -> Unit

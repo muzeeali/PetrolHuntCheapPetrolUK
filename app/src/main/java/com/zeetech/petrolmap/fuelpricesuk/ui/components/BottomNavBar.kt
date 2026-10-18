@@ -2,8 +2,8 @@ package com.zeetech.petrolmap.fuelpricesuk.ui.components
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,12 +48,12 @@ enum class AppTab {
 }
 
 /**
- * Apple-grade Floating Translucent Dock Navigation Bar.
+ * Full-width seamless bottom navigation bar.
  * Features:
- * - Floating rounded pill material with subtle ambient elevation
- * - Light-catching translucent surface with subtle hairline highlight
- * - Animated pill indicator and spring-scale tab feedback
- * - Instant tactile pointer-down haptic response (Response principle)
+ * - Solid, continuous PetrolSurface background covering the full width and system navigation bar area
+ * - Crisp 1dp hairline border on top separating content cleanly
+ * - Smooth animated pill indicators and spring-scale tab feedback
+ * - Instant tactile pointer-down haptic response
  */
 @Composable
 fun BottomNavBar(
@@ -61,24 +61,22 @@ fun BottomNavBar(
     currentTab: AppTab,
     onTabSelected: (AppTab) -> Unit
 ) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .navigationBarsPadding()
-            .padding(start = 24.dp, end = 24.dp, bottom = 8.dp, top = 2.dp),
-        contentAlignment = Alignment.Center
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        color = PetrolSurface,
+        border = BorderStroke(1.dp, PetrolBorder),
+        shadowElevation = 4.dp
     ) {
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(26.dp),
-            color = PetrolSurface.copy(alpha = 0.94f),
-            border = androidx.compose.foundation.BorderStroke(1.dp, PetrolBorder.copy(alpha = 0.85f)),
-            shadowElevation = 8.dp
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 10.dp, vertical = 6.dp),
+                    .height(58.dp)
+                    .padding(horizontal = 16.dp, vertical = 6.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -133,7 +131,7 @@ private fun NavBarItem(
             .clip(RoundedCornerShape(18.dp))
             .background(pillBgColor)
             .applePressEffect(scaleOnPress = 0.95f, onClick = onClick)
-            .padding(vertical = 6.dp, horizontal = 12.dp),
+            .padding(vertical = 8.dp, horizontal = 12.dp),
         contentAlignment = Alignment.Center
     ) {
         Row(
