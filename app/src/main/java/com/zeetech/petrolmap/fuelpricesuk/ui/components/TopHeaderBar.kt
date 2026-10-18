@@ -73,6 +73,7 @@ fun TopHeaderBar(
     onRefreshClick: () -> Unit,
     onSearchClick: () -> Unit,
     isLocationDenied: Boolean,
+    onRequestLocation: (() -> Unit)? = null,
     isOffline: Boolean,
     modifier: Modifier = Modifier
 ) {
@@ -357,7 +358,13 @@ fun TopHeaderBar(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(PetrolSurfaceElevated)
-                        .clickable { onSearchClick() }
+                        .clickable {
+                            if (onRequestLocation != null) {
+                                onRequestLocation()
+                            } else {
+                                onSearchClick()
+                            }
+                        }
                         .padding(horizontal = 12.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -369,7 +376,7 @@ fun TopHeaderBar(
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "Location is off · Tap to search",
+                        text = "Location is off · Tap to enable",
                         color = PetrolPrimaryText,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Medium,

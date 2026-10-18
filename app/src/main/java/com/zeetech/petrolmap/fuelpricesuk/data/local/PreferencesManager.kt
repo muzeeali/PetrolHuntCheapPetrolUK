@@ -43,8 +43,16 @@ class PreferencesManager(context: Context) {
         get() = prefs.getBoolean("has_prompted_location", false)
         set(value) = prefs.edit().putBoolean("has_prompted_location", value).apply()
 
+    var hasRequestedLocationPermission: Boolean
+        get() = prefs.getBoolean("has_requested_location_permission", false)
+        set(value) = prefs.edit().putBoolean("has_requested_location_permission", value).apply()
+
+    var hasRequestedNotificationPermission: Boolean
+        get() = prefs.getBoolean("has_requested_notification_permission", false)
+        set(value) = prefs.edit().putBoolean("has_requested_notification_permission", value).apply()
+
     var fuelAlertsEnabled: Boolean
-        get() = prefs.getBoolean("fuel_alerts_enabled", false)
+        get() = prefs.getBoolean("fuel_alerts_enabled", true)
         set(value) = prefs.edit().putBoolean("fuel_alerts_enabled", value).apply()
 
     var firstLaunchTimestamp: Long

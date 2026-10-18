@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.NotificationsOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -140,7 +141,12 @@ fun PetrolMapApp() {
     var userLat by remember { mutableStateOf(savedLat) }
     var userLng by remember { mutableStateOf(savedLng) }
     var recenterTrigger by remember { mutableIntStateOf(0) }
+    var isLocationGranted by remember { mutableStateOf(LocationHelper.hasLocationPermission(context)) }
+    var isNotificationGranted by remember { mutableStateOf(LocationHelper.hasNotificationPermission(context)) }
+    var fuelAlertsEnabledState by remember { mutableStateOf(prefs.fuelAlertsEnabled && LocationHelper.hasNotificationPermission(context)) }
     var isLocationDenied by remember { mutableStateOf(!LocationHelper.hasLocationPermission(context)) }
+    var isGpsRequestedByUser by remember { mutableStateOf(false) }
+    var isNotificationRequestedByUser by remember { mutableStateOf(false) }
 
     // Stations Data State
     var stations by remember { mutableStateOf<List<Station>>(emptyList()) }
@@ -180,8 +186,9 @@ fun PetrolMapApp() {
     var showFirstLaunch by remember {
         mutableStateOf(!prefs.hasPromptedLocation && !LocationHelper.hasLocationPermission(context))
     }
+    var showLocationAlreadyGrantedDialog by remember { mutableStateOf(false) }
+    var showNotificationPermissionRequiredDialog by remember { mutableStateOf(false) }
     var showLocationPermissionDialog by remember { mutableStateOf(false) }
-    var isGpsRequestedByUser by remember { mutableStateOf(false) }
     var showTurnOnGpsDialog by remember { mutableStateOf(false) }
     var showSearchScreen by remember { mutableStateOf(false) }
     var showFilterSheet by remember { mutableStateOf(false) }
@@ -372,11 +379,22 @@ fun PetrolMapApp() {
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
+        prefs.hasRequestedNotificationPermission = true
+        isNotificationGranted = isGranted
         prefs.fuelAlertsEnabled = isGranted
+        fuelAlertsEnabledState = isGranted
         if (isGranted) {
             com.google.firebase.messaging.FirebaseMessaging.getInstance()
                 .subscribeToTopic(com.zeetech.petrolmap.fuelpricesuk.services.PetrolFirebaseMessagingService.TOPIC_UK_FUEL_ALERTS)
+            android.widget.Toast.makeText(context, "Fuel price alerts enabled", android.widget.Toast.LENGTH_SHORT).show()
+        } else {
+            com.google.firebase.messaging.FirebaseMessaging.getInstance()
+                .unsubscribeFromTopic(com.zeetech.petrolmap.fuelpricesuk.services.PetrolFirebaseMessagingService.TOPIC_UK_FUEL_ALERTS)
+            if (isNotificationRequestedByUser && LocationHelper.isNotificationPermanentlyDenied(activity, prefs)) {
+                showNotificationPermissionRequiredDialog = true
+            }
         }
+        isNotificationRequestedByUser = false
     }
 
     // Permission Launcher: Handles Location permissions
@@ -385,12 +403,16 @@ fun PetrolMapApp() {
     ) { permissions ->
         val fineGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
         val coarseGranted = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        val granted = fineGranted || coarseGranted
         prefs.hasPromptedLocation = true
+        prefs.hasRequestedLocationPermission = true
         showFirstLaunch = false
+        isLocationGranted = granted
+        isLocationDenied = !granted
 
-        if (fineGranted || coarseGranted) {
-            isLocationDenied = false
+        if (granted) {
             showLocationPermissionDialog = false
+            showLocationDisclosureDialog = false
             isGpsRequestedByUser = false
             if (!LocationHelper.isLocationServiceEnabled(context)) {
                 // Once permission is granted, immediately prompt user to turn on GPS!
@@ -401,24 +423,27 @@ fun PetrolMapApp() {
                 detectLocationAndFetch(forceRecenter = true)
             }
         } else {
-            isLocationDenied = true
-            if (isGpsRequestedByUser) {
+            if (isGpsRequestedByUser && LocationHelper.isLocationPermanentlyDenied(activity, prefs)) {
                 showLocationPermissionDialog = true
             }
             fetchStations()
         }
 
-        // Prompt notification permission with disclosure on Android 13+
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !LocationHelper.hasNotificationPermission(context)) {
+        // Prompt notification permission with disclosure on Android 13+ if not prompted before
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            !LocationHelper.hasNotificationPermission(context) &&
+            !prefs.hasRequestedNotificationPermission) {
             showNotificationDisclosureDialog = true
-        } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+        } else if (LocationHelper.hasNotificationPermission(context)) {
             prefs.fuelAlertsEnabled = true
+            fuelAlertsEnabledState = true
             com.google.firebase.messaging.FirebaseMessaging.getInstance()
                 .subscribeToTopic(com.zeetech.petrolmap.fuelpricesuk.services.PetrolFirebaseMessagingService.TOPIC_UK_FUEL_ALERTS)
         }
     }
 
     fun launchLocationPermission() {
+        prefs.hasRequestedLocationPermission = true
         val perms = arrayOf(
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION
@@ -432,9 +457,13 @@ fun PetrolMapApp() {
         pinnedLat = null
         pinnedLng = null
 
-        if (LocationHelper.hasLocationPermission(context)) {
-            isLocationDenied = false
+        val hasLoc = LocationHelper.hasLocationPermission(context)
+        isLocationGranted = hasLoc
+        isLocationDenied = !hasLoc
+
+        if (hasLoc) {
             showLocationPermissionDialog = false
+            showLocationDisclosureDialog = false
             if (!LocationHelper.isLocationServiceEnabled(context)) {
                 showTurnOnGpsDialog = true
                 requestTurnOnGps()
@@ -443,14 +472,57 @@ fun PetrolMapApp() {
             }
         } else {
             isGpsRequestedByUser = true
-            val isPermanentlyDenied = activity != null &&
-                    prefs.hasPromptedLocation &&
-                    !ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.ACCESS_FINE_LOCATION)
-
-            if (isPermanentlyDenied) {
+            if (LocationHelper.isLocationPermanentlyDenied(activity, prefs)) {
                 showLocationPermissionDialog = true
             } else {
                 showLocationDisclosureDialog = true
+            }
+        }
+    }
+
+    // Handles Location permission click from Settings screen
+    fun requestLocationPermissionFromSettings() {
+        val hasLoc = LocationHelper.hasLocationPermission(context)
+        isLocationGranted = hasLoc
+        isLocationDenied = !hasLoc
+
+        if (hasLoc) {
+            showLocationAlreadyGrantedDialog = true
+        } else {
+            isGpsRequestedByUser = true
+            if (LocationHelper.isLocationPermanentlyDenied(activity, prefs)) {
+                showLocationPermissionDialog = true
+            } else {
+                showLocationDisclosureDialog = true
+            }
+        }
+    }
+
+    // Handles notification alert toggle with real permission verification
+    fun requestNotificationPermissionOrToggle() {
+        val hasNotif = LocationHelper.hasNotificationPermission(context)
+        isNotificationGranted = hasNotif
+
+        if (fuelAlertsEnabledState && hasNotif) {
+            prefs.fuelAlertsEnabled = false
+            fuelAlertsEnabledState = false
+            com.google.firebase.messaging.FirebaseMessaging.getInstance()
+                .unsubscribeFromTopic(com.zeetech.petrolmap.fuelpricesuk.services.PetrolFirebaseMessagingService.TOPIC_UK_FUEL_ALERTS)
+            android.widget.Toast.makeText(context, "Fuel price alerts disabled", android.widget.Toast.LENGTH_SHORT).show()
+        } else {
+            if (hasNotif) {
+                prefs.fuelAlertsEnabled = true
+                fuelAlertsEnabledState = true
+                com.google.firebase.messaging.FirebaseMessaging.getInstance()
+                    .subscribeToTopic(com.zeetech.petrolmap.fuelpricesuk.services.PetrolFirebaseMessagingService.TOPIC_UK_FUEL_ALERTS)
+                android.widget.Toast.makeText(context, "Fuel price alerts enabled", android.widget.Toast.LENGTH_SHORT).show()
+            } else {
+                isNotificationRequestedByUser = true
+                if (LocationHelper.isNotificationPermanentlyDenied(activity, prefs)) {
+                    showNotificationPermissionRequiredDialog = true
+                } else {
+                    showNotificationDisclosureDialog = true
+                }
             }
         }
     }
@@ -461,8 +533,21 @@ fun PetrolMapApp() {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 inAppUpdateManager?.onResumeCheck()
-                if (LocationHelper.hasLocationPermission(context)) {
-                    isLocationDenied = false
+
+                val hasLoc = LocationHelper.hasLocationPermission(context)
+                val hasNotif = LocationHelper.hasNotificationPermission(context)
+                isLocationGranted = hasLoc
+                isLocationDenied = !hasLoc
+                isNotificationGranted = hasNotif
+
+                if (!hasNotif && prefs.fuelAlertsEnabled) {
+                    prefs.fuelAlertsEnabled = false
+                    com.google.firebase.messaging.FirebaseMessaging.getInstance()
+                        .unsubscribeFromTopic(com.zeetech.petrolmap.fuelpricesuk.services.PetrolFirebaseMessagingService.TOPIC_UK_FUEL_ALERTS)
+                }
+                fuelAlertsEnabledState = prefs.fuelAlertsEnabled && hasNotif
+
+                if (hasLoc) {
                     showLocationPermissionDialog = false
                     if (LocationHelper.isLocationServiceEnabled(context)) {
                         if (showTurnOnGpsDialog) {
@@ -492,6 +577,10 @@ fun PetrolMapApp() {
         inAppUpdateManager?.checkAndStartUpdate()
         if (activity != null) {
             InAppReviewHelper.checkAndPromptReviewIfEligible(activity, prefs)
+        }
+        if (LocationHelper.hasNotificationPermission(context) && prefs.fuelAlertsEnabled) {
+            com.google.firebase.messaging.FirebaseMessaging.getInstance()
+                .subscribeToTopic(com.zeetech.petrolmap.fuelpricesuk.services.PetrolFirebaseMessagingService.TOPIC_UK_FUEL_ALERTS)
         }
         if (!showFirstLaunch) {
             if (LocationHelper.hasLocationPermission(context)) {
@@ -539,10 +628,13 @@ fun PetrolMapApp() {
                 prefs.hasPromptedLocation = true
                 showFirstLaunch = false
                 showSearchScreen = true
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !LocationHelper.hasNotificationPermission(context)) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                    !LocationHelper.hasNotificationPermission(context) &&
+                    !prefs.hasRequestedNotificationPermission) {
                     showNotificationDisclosureDialog = true
-                } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                } else if (LocationHelper.hasNotificationPermission(context)) {
                     prefs.fuelAlertsEnabled = true
+                    fuelAlertsEnabledState = true
                     com.google.firebase.messaging.FirebaseMessaging.getInstance()
                         .subscribeToTopic(com.zeetech.petrolmap.fuelpricesuk.services.PetrolFirebaseMessagingService.TOPIC_UK_FUEL_ALERTS)
                 }
@@ -647,27 +739,30 @@ fun PetrolMapApp() {
         containerColor = PetrolSurface,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            TopHeaderBar(
-                locationTitle = locationTitle,
-                isOutsideUk = isOutsideUk,
-                isUserPinnedLocation = isUserPinnedLocation,
-                onClearPinnedLocation = {
-                    isUserPinnedLocation = false
-                    pinnedLat = null
-                    pinnedLng = null
-                    locationTitle = "Selected Area"
-                    fetchStations()
-                },
-                searchRadius = searchRadius,
-                onRadiusSelected = { r -> onRadiusChanged(r) },
-                selectedFuel = selectedFuel,
-                onFuelSelected = { fuel -> onFuelChanged(fuel) },
-                isRefreshing = isRefreshing,
-                onRefreshClick = { fetchStations(isRefresh = true) },
-                onSearchClick = { showSearchScreen = true },
-                isLocationDenied = isLocationDenied,
-                isOffline = isOffline
-            )
+            if (currentTab == AppTab.MAP) {
+                TopHeaderBar(
+                    locationTitle = locationTitle,
+                    isOutsideUk = isOutsideUk,
+                    isUserPinnedLocation = isUserPinnedLocation,
+                    onClearPinnedLocation = {
+                        isUserPinnedLocation = false
+                        pinnedLat = null
+                        pinnedLng = null
+                        locationTitle = "Selected Area"
+                        fetchStations()
+                    },
+                    searchRadius = searchRadius,
+                    onRadiusSelected = { r -> onRadiusChanged(r) },
+                    selectedFuel = selectedFuel,
+                    onFuelSelected = { fuel -> onFuelChanged(fuel) },
+                    isRefreshing = isRefreshing,
+                    onRefreshClick = { fetchStations(isRefresh = true) },
+                    onSearchClick = { showSearchScreen = true },
+                    isLocationDenied = isLocationDenied,
+                    onRequestLocation = { requestGpsWithPermissionPrompt() },
+                    isOffline = isOffline
+                )
+            }
         },
         bottomBar = {
             BottomNavBar(
@@ -788,7 +883,8 @@ fun PetrolMapApp() {
                         currentRadius = searchRadius,
                         currentSort = sortMode,
                         currentNavApp = navigationApp,
-                        isLocationGranted = LocationHelper.hasLocationPermission(context),
+                        isLocationGranted = isLocationGranted,
+                        fuelAlertsEnabled = fuelAlertsEnabledState,
                         lastUpdatedTime = lastUpdatedTime,
                         onFuelClick = { showFuelSheet = true },
                         onRadiusClick = { showFilterSheet = true },
@@ -797,6 +893,8 @@ fun PetrolMapApp() {
                             navigationApp = app
                             prefs.navigationApp = app
                         },
+                        onToggleAlerts = { requestNotificationPermissionOrToggle() },
+                        onLocationPermissionClick = { requestLocationPermissionFromSettings() },
                         onRefreshPrices = { fetchStations(isRefresh = true) },
                         onClearSavedData = {
                             prefs.clearSavedData()
@@ -917,17 +1015,26 @@ fun PetrolMapApp() {
     }
 
     // In-App Location Permission Required Dialog
+    // In-App Location Permission Required Dialog (Permanently Denied)
     if (showLocationPermissionDialog) {
         AlertDialog(
             onDismissRequest = {
                 showLocationPermissionDialog = false
                 isGpsRequestedByUser = false
             },
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.MyLocation,
+                    contentDescription = null,
+                    tint = PetrolBrandGreen,
+                    modifier = Modifier.size(28.dp)
+                )
+            },
             title = {
                 Text(
                     text = "Location Permission Required",
                     color = PetrolPrimaryText,
-                    fontSize = 18.sp,
+                    fontSize = 17.sp,
                     fontWeight = FontWeight.Bold
                 )
             },
@@ -935,25 +1042,15 @@ fun PetrolMapApp() {
                 Text(
                     text = "Petrol Map requires location access to find petrol stations and compare fuel prices near your current location. Please allow location access in App Settings.",
                     color = PetrolSecondaryText,
-                    fontSize = 14.sp,
-                    lineHeight = 20.sp
+                    fontSize = 13.5.sp,
+                    lineHeight = 19.sp
                 )
             },
             confirmButton = {
                 Button(
                     onClick = {
                         showLocationPermissionDialog = false
-                        try {
-                            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                                data = Uri.fromParts("package", context.packageName, null)
-                            }
-                            context.startActivity(intent)
-                        } catch (e: Exception) {
-                            try {
-                                val intent = Intent(Settings.ACTION_SETTINGS)
-                                context.startActivity(intent)
-                            } catch (e2: Exception) {}
-                        }
+                        LocationHelper.openAppSettings(context)
                     },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = PetrolBrandGreen,
@@ -972,6 +1069,61 @@ fun PetrolMapApp() {
                     }
                 ) {
                     Text("Cancel", color = PetrolSecondaryText)
+                }
+            },
+            containerColor = PetrolSurfaceElevated,
+            shape = RoundedCornerShape(20.dp)
+        )
+    }
+
+    // In-App Location Permission Already Granted Dialog (From Settings)
+    if (showLocationAlreadyGrantedDialog) {
+        AlertDialog(
+            onDismissRequest = { showLocationAlreadyGrantedDialog = false },
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.MyLocation,
+                    contentDescription = null,
+                    tint = PetrolBrandGreen,
+                    modifier = Modifier.size(28.dp)
+                )
+            },
+            title = {
+                Text(
+                    text = "Location Permission Granted",
+                    color = PetrolPrimaryText,
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text(
+                    text = "Petrol Map has permission to access your location while using the app to show nearby fuel prices and calculate driving distances.\n\nYou can manage permissions anytime in App Settings.",
+                    color = PetrolSecondaryText,
+                    fontSize = 13.5.sp,
+                    lineHeight = 19.sp
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showLocationAlreadyGrantedDialog = false
+                        LocationHelper.openAppSettings(context)
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = PetrolBrandGreen,
+                        contentColor = PetrolBackground
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("App Settings", fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showLocationAlreadyGrantedDialog = false }
+                ) {
+                    Text("OK", color = PetrolSecondaryText)
                 }
             },
             containerColor = PetrolSurfaceElevated,
@@ -1045,6 +1197,7 @@ fun PetrolMapApp() {
         AlertDialog(
             onDismissRequest = {
                 showNotificationDisclosureDialog = false
+                isNotificationRequestedByUser = false
             },
             icon = {
                 Icon(
@@ -1075,7 +1228,20 @@ fun PetrolMapApp() {
                     onClick = {
                         showNotificationDisclosureDialog = false
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            prefs.hasRequestedNotificationPermission = true
                             notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        } else {
+                            if (LocationHelper.hasNotificationPermission(context)) {
+                                prefs.fuelAlertsEnabled = true
+                                fuelAlertsEnabledState = true
+                                isNotificationGranted = true
+                                com.google.firebase.messaging.FirebaseMessaging.getInstance()
+                                    .subscribeToTopic(com.zeetech.petrolmap.fuelpricesuk.services.PetrolFirebaseMessagingService.TOPIC_UK_FUEL_ALERTS)
+                                android.widget.Toast.makeText(context, "Fuel price alerts enabled", android.widget.Toast.LENGTH_SHORT).show()
+                            } else {
+                                showNotificationPermissionRequiredDialog = true
+                            }
+                            isNotificationRequestedByUser = false
                         }
                     },
                     colors = ButtonDefaults.buttonColors(
@@ -1091,9 +1257,72 @@ fun PetrolMapApp() {
                 TextButton(
                     onClick = {
                         showNotificationDisclosureDialog = false
+                        isNotificationRequestedByUser = false
                     }
                 ) {
                     Text("Not Now", color = PetrolSecondaryText)
+                }
+            },
+            containerColor = PetrolSurfaceElevated,
+            shape = RoundedCornerShape(20.dp)
+        )
+    }
+
+    // In-App Notification Permission Required Dialog (Permanently Denied or OS Disabled)
+    if (showNotificationPermissionRequiredDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showNotificationPermissionRequiredDialog = false
+                isNotificationRequestedByUser = false
+            },
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.NotificationsOff,
+                    contentDescription = null,
+                    tint = PetrolBrandGreen,
+                    modifier = Modifier.size(28.dp)
+                )
+            },
+            title = {
+                Text(
+                    text = "Notification Permission Required",
+                    color = PetrolPrimaryText,
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text(
+                    text = "Notifications are disabled for Petrol Map in device settings. Please enable notifications in App Settings to receive timely alerts when fuel prices drop.",
+                    color = PetrolSecondaryText,
+                    fontSize = 13.5.sp,
+                    lineHeight = 19.sp
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showNotificationPermissionRequiredDialog = false
+                        isNotificationRequestedByUser = false
+                        LocationHelper.openAppNotificationSettings(context)
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = PetrolBrandGreen,
+                        contentColor = PetrolBackground
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("Open Settings", fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showNotificationPermissionRequiredDialog = false
+                        isNotificationRequestedByUser = false
+                    }
+                ) {
+                    Text("Cancel", color = PetrolSecondaryText)
                 }
             },
             containerColor = PetrolSurfaceElevated,

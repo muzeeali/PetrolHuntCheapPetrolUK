@@ -29,6 +29,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocalGasStation
@@ -89,11 +90,14 @@ fun SettingsScreen(
     currentSort: SortMode,
     currentNavApp: NavigationApp,
     isLocationGranted: Boolean,
+    fuelAlertsEnabled: Boolean,
     lastUpdatedTime: String?,
     onFuelClick: () -> Unit,
     onRadiusClick: () -> Unit,
     onSortClick: () -> Unit,
     onNavAppChanged: (NavigationApp) -> Unit,
+    onToggleAlerts: () -> Unit,
+    onLocationPermissionClick: () -> Unit,
     onRefreshPrices: () -> Unit,
     onClearSavedData: () -> Unit,
     prefs: PreferencesManager? = null
@@ -127,7 +131,7 @@ fun SettingsScreen(
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Customise your telemetry & feed parameters",
+                    text = "Customise your fuel preferences & app settings",
                     color = PetrolSecondaryText,
                     fontSize = 12.sp
                 )
@@ -239,26 +243,20 @@ fun SettingsScreen(
                 onClick = onSortClick
             )
 
-            var isAlertsOn by remember { mutableStateOf(effectivePrefs.fuelAlertsEnabled) }
+            SettingsRow(
+                icon = Icons.Default.MyLocation,
+                title = "Location Permission",
+                value = if (isLocationGranted) "Granted" else "Disabled",
+                valueColor = if (isLocationGranted) PetrolBrandGreen else PetrolError,
+                onClick = onLocationPermissionClick
+            )
+
             SettingsRow(
                 icon = Icons.Default.Notifications,
                 title = "Price Drop Alerts",
-                value = if (isAlertsOn) "Enabled" else "Off",
-                valueColor = if (isAlertsOn) PetrolBrandGreen else PetrolSecondaryText,
-                onClick = {
-                    val newState = !isAlertsOn
-                    isAlertsOn = newState
-                    effectivePrefs.fuelAlertsEnabled = newState
-                    if (newState) {
-                        com.google.firebase.messaging.FirebaseMessaging.getInstance()
-                            .subscribeToTopic(com.zeetech.petrolmap.fuelpricesuk.services.PetrolFirebaseMessagingService.TOPIC_UK_FUEL_ALERTS)
-                        Toast.makeText(context, "Fuel price alerts enabled", Toast.LENGTH_SHORT).show()
-                    } else {
-                        com.google.firebase.messaging.FirebaseMessaging.getInstance()
-                            .unsubscribeFromTopic(com.zeetech.petrolmap.fuelpricesuk.services.PetrolFirebaseMessagingService.TOPIC_UK_FUEL_ALERTS)
-                        Toast.makeText(context, "Fuel price alerts disabled", Toast.LENGTH_SHORT).show()
-                    }
-                },
+                value = if (fuelAlertsEnabled) "Enabled" else "Off",
+                valueColor = if (fuelAlertsEnabled) PetrolBrandGreen else PetrolSecondaryText,
+                onClick = onToggleAlerts,
                 isLast = true
             )
         }
@@ -266,7 +264,7 @@ fun SettingsScreen(
         Spacer(modifier = Modifier.height(18.dp))
 
         // SECTION B: NAVIGATION
-        SectionHeader(icon = Icons.Default.MyLocation, title = "NAVIGATION")
+        SectionHeader(icon = Icons.Default.DirectionsCar, title = "NAVIGATION")
 
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -315,21 +313,15 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(18.dp))
 
-        // SECTION C: FUEL DATA
-        SectionHeader(icon = Icons.Default.Public, title = "FUEL DATA")
+        // SECTION C: DATA & CACHE
+        SectionHeader(icon = Icons.Default.Refresh, title = "DATA & CACHE")
 
         SettingsGroup {
             SettingsRow(
-                icon = Icons.Default.Info,
-                title = "Price Status",
-                value = if (lastUpdatedTime != null) "Updated" else "Live",
-                onClick = {}
-            )
-
-            SettingsRow(
                 icon = Icons.Default.Refresh,
-                title = "Refresh Prices",
-                value = "Sync",
+                title = "Refresh Forecourt Prices",
+                value = if (lastUpdatedTime != null) "Updated" else "Sync Now",
+                valueColor = PetrolBrandGreen,
                 onClick = {
                     onRefreshPrices()
                     Toast.makeText(context, "Fetching latest UK fuel prices...", Toast.LENGTH_SHORT).show()
@@ -338,7 +330,7 @@ fun SettingsScreen(
 
             SettingsRow(
                 icon = Icons.Default.DeleteOutline,
-                title = "Clear Saved Data",
+                title = "Clear Cached Data",
                 value = "Clear",
                 valueColor = PetrolError,
                 onClick = { showClearConfirm = true },
@@ -430,23 +422,10 @@ Device: ${Build.MANUFACTURER} ${Build.MODEL} (Android ${Build.VERSION.RELEASE})
 
         Spacer(modifier = Modifier.height(18.dp))
 
-        // SECTION E: LEGAL & ABOUT (Single unified section, no duplicate logo/identity card)
+        // SECTION E: LEGAL & ABOUT (Policies, Attribution & Disclaimers)
         SectionHeader(icon = Icons.Default.Security, title = "LEGAL & ABOUT")
 
         SettingsGroup {
-            SettingsRow(
-                icon = Icons.Default.MyLocation,
-                title = "Location Permission",
-                value = if (isLocationGranted) "Granted" else "Disabled",
-                valueColor = if (isLocationGranted) PetrolBrandGreen else PetrolError,
-                onClick = {
-                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                        data = Uri.fromParts("package", context.packageName, null)
-                    }
-                    context.startActivity(intent)
-                }
-            )
-
             SettingsRow(
                 icon = Icons.Default.Lock,
                 title = "Privacy Policy",
@@ -477,22 +456,12 @@ Device: ${Build.MANUFACTURER} ${Build.MODEL} (Android ${Build.VERSION.RELEASE})
 
             SettingsRow(
                 icon = Icons.Default.Public,
-                title = "Fuel Data Attribution",
+                title = "Data Attribution & Disclaimer",
                 value = "gov.uk",
                 valueColor = PetrolBrandGreen,
                 onClick = {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.gov.uk/government/collections/fuel-finder"))
-                    context.startActivity(intent)
-                }
-            )
-
-            SettingsRow(
-                icon = Icons.Default.Info,
-                title = "Disclaimer",
-                value = "View",
-                onClick = {
-                    infoDialogTitle = "Disclaimer"
-                    infoDialogMessage = "Fuel Price Disclaimer:\nPrices are sourced via open public data provided under the UK Fuel Finder & CMA Open Data Scheme. While forecourts update regularly, pump prices at point of sale may vary. Always verify at the pump.\n\nGovernment Non-Affiliation:\nPetrol Map is an independent fuel price tool and is not affiliated with, sponsored by, or endorsed by the UK Government or any government agency. Fuel price data is sourced from open public data provided under the UK Fuel Finder scheme."
+                    infoDialogTitle = "Fuel Data Attribution & Disclaimer"
+                    infoDialogMessage = "Prices are sourced via open public data provided under the UK Fuel Finder & CMA Open Data Scheme (https://www.gov.uk/government/collections/fuel-finder).\n\nWhile forecourts update regularly, pump prices at point of sale may vary. Always verify prices at the pump.\n\nGovernment Non-Affiliation:\nPetrol Map is an independent UK fuel price tool and is not affiliated with, sponsored by, or endorsed by the UK Government or any government agency. Fuel price data is sourced from open public data provided under the UK Fuel Finder scheme."
                 },
                 isLast = true
             )
@@ -586,6 +555,16 @@ Device: ${Build.MANUFACTURER} ${Build.MODEL} (Android ${Build.VERSION.RELEASE})
                         } catch (_: Exception) {}
                     }) {
                         Text("Open Online", color = PetrolPrimaryText)
+                    }
+                } else if (infoDialogTitle?.contains("Attribution") == true) {
+                    TextButton(onClick = {
+                        try {
+                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.gov.uk/government/collections/fuel-finder")).apply {
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            })
+                        } catch (_: Exception) {}
+                    }) {
+                        Text("Open gov.uk", color = PetrolPrimaryText)
                     }
                 }
             },
