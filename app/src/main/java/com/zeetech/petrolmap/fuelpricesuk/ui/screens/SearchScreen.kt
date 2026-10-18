@@ -84,20 +84,21 @@ fun SearchScreen(
     var searchQuery by remember(initialQuery) { mutableStateOf(initialQuery) }
     var searchResults by remember { mutableStateOf<List<SearchLocation>>(emptyList()) }
     var isSearching by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
-    var searchJob by remember { mutableStateOf<Job?>(null) }
+    var searchNonce by remember { mutableStateOf(0) }
 
     LaunchedEffect(searchQuery) {
-        if (searchQuery.trim().length >= 2) {
+        val q = searchQuery.trim()
+        if (q.length >= 2) {
             isSearching = true
-            searchJob?.cancel()
-            searchJob = scope.launch {
-                delay(250) // debounce
-                val res = UKGeocodingHelper.search(searchQuery)
+            val currentNonce = ++searchNonce
+            delay(500) // Debounce 500ms to adhere to OSM Nominatim policy
+            val res = UKGeocodingHelper.search(q)
+            if (searchNonce == currentNonce) {
                 searchResults = res
                 isSearching = false
             }
         } else {
+            searchNonce++
             searchResults = emptyList()
             isSearching = false
         }

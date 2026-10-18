@@ -123,7 +123,7 @@ object UKGeocodingHelper {
             val url = "https://nominatim.openstreetmap.org/search?q=$encoded&format=json&limit=8"
             val request = Request.Builder()
                 .url(url)
-                .header("User-Agent", "PetrolMapUK/${com.zeetech.petrolmap.fuelpricesuk.BuildConfig.VERSION_NAME}")
+                .header("User-Agent", "PetrolMapUK/${com.zeetech.petrolmap.fuelpricesuk.BuildConfig.VERSION_NAME} (contact: muzeeali8@gmail.com)")
                 .build()
             client.newCall(request).execute().use { response ->
                 if (response.isSuccessful) {
@@ -131,11 +131,11 @@ object UKGeocodingHelper {
                     if (body != null) {
                         val array = JSONArray(body)
                         for (i in 0 until array.length()) {
-                            val item = array.getJSONObject(i)
+                            val item = array.optJSONObject(i) ?: continue
                             val name = item.optString("name", item.optString("display_name").split(",").firstOrNull() ?: clean)
                             val displayName = item.optString("display_name", "")
-                            val lat = item.getDouble("lat")
-                            val lng = item.getDouble("lon")
+                            val lat = item.optString("lat", "").toDoubleOrNull() ?: continue
+                            val lng = item.optString("lon", "").toDoubleOrNull() ?: continue
 
                             val inUk = isInsideUk(lat, lng) || displayName.contains("United Kingdom", ignoreCase = true)
                             val subtitle = if (inUk) {

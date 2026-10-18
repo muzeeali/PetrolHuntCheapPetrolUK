@@ -577,14 +577,17 @@ fun MainMapScreen(
                                     color = PetrolSecondaryText,
                                     fontSize = 11.5.sp
                                 )
-                                Spacer(modifier = Modifier.height(10.dp))
-                                Button(
-                                    onClick = { onRadiusSelected(searchRadius + 5) },
-                                    colors = ButtonDefaults.buttonColors(containerColor = PetrolBrandGreen, contentColor = PetrolBackground),
-                                    shape = RoundedCornerShape(14.dp),
-                                    modifier = Modifier.height(34.dp)
-                                ) {
-                                    Text("Increase radius to ${searchRadius + 5}mi", fontSize = 11.5.sp, fontWeight = FontWeight.Bold)
+                                if (searchRadius < 50) {
+                                    val nextRadius = minOf(searchRadius + 5, 50)
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                    Button(
+                                        onClick = { onRadiusSelected(nextRadius) },
+                                        colors = ButtonDefaults.buttonColors(containerColor = PetrolBrandGreen, contentColor = PetrolBackground),
+                                        shape = RoundedCornerShape(14.dp),
+                                        modifier = Modifier.height(34.dp)
+                                    ) {
+                                        Text("Increase radius to ${nextRadius}mi", fontSize = 11.5.sp, fontWeight = FontWeight.Bold)
+                                    }
                                 }
                             }
                         }

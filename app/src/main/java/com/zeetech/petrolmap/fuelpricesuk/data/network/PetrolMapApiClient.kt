@@ -189,7 +189,12 @@ object PetrolMapApiClient {
         if (stationsArray == null) return stations
 
         for (i in 0 until stationsArray.length()) {
-            val item = stationsArray.getJSONObject(i)
+            val item = stationsArray.optJSONObject(i) ?: continue
+            val lat = item.optDouble("latitude", Double.NaN)
+            val lng = item.optDouble("longitude", Double.NaN)
+            val price = item.optDouble("price", 0.0)
+            if (lat.isNaN() || lng.isNaN() || price <= 0.0) continue
+
             val addrObj = item.optJSONObject("address")
             val addr = StationAddress(
                 line1 = addrObj?.optString("line1") ?: "",
@@ -210,8 +215,7 @@ object PetrolMapApiClient {
                 }
             }
             if (!pricesMap.containsKey(selectedFuel.code)) {
-                val p = item.optDouble("price")
-                if (!p.isNaN() && p > 0) pricesMap[selectedFuel.code] = p
+                if (price > 0.0) pricesMap[selectedFuel.code] = price
             }
 
             val updatedDatesMap = mutableMapOf<String, String>()
@@ -232,10 +236,10 @@ object PetrolMapApiClient {
                     id = item.optString("id", i.toString()),
                     name = item.optString("name", "Petrol Station"),
                     brand = item.optString("brand", "Independent"),
-                    latitude = item.getDouble("latitude"),
-                    longitude = item.getDouble("longitude"),
+                    latitude = lat,
+                    longitude = lng,
                     address = addr,
-                    price = item.getDouble("price"),
+                    price = price,
                     fuel = item.optString("fuel", selectedFuel.code),
                     distanceMiles = item.optDouble("distanceMiles", 0.0),
                     updatedAt = item.optString("updatedAt", ""),

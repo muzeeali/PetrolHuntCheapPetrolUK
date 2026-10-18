@@ -40,7 +40,7 @@ class PreferencesManager(context: Context) {
         set(value) = prefs.edit().putString("nav_app", value.name).apply()
 
     var rememberNavigationAppChoice: Boolean
-        get() = prefs.getBoolean("remember_nav_app_choice", false)
+        get() = prefs.getBoolean("remember_nav_app_choice", true)
         set(value) = prefs.edit().putBoolean("remember_nav_app_choice", value).apply()
 
     val hasConfiguredNavigationAppChoice: Boolean
@@ -77,6 +77,10 @@ class PreferencesManager(context: Context) {
         get() = prefs.getLong("last_review_prompt_ts", 0L)
         set(value) = prefs.edit().putLong("last_review_prompt_ts", value).apply()
 
+    var reviewPromptCount: Int
+        get() = prefs.getInt("review_prompt_count", 0)
+        set(value) = prefs.edit().putInt("review_prompt_count", value).apply()
+
     var hasUserRatedApp: Boolean
         get() = prefs.getBoolean("has_user_rated_app", false)
         set(value) = prefs.edit().putBoolean("has_user_rated_app", value).apply()
@@ -85,13 +89,24 @@ class PreferencesManager(context: Context) {
         if (hasUserRatedApp) return false
         val now = System.currentTimeMillis()
         val timeSinceFirstLaunch = now - firstLaunchTimestamp
-        val oneDayMillis = 24 * 60 * 60 * 1000L
+        val oneDayMillis = 24L * 60 * 60 * 1000L
+        val oneWeekMillis = 7L * oneDayMillis
+        val oneMonthMillis = 30L * oneDayMillis
+
         if (timeSinceFirstLaunch < oneDayMillis) return false
+
+        val count = reviewPromptCount
         val timeSinceLastPrompt = now - lastReviewPromptTimestamp
-        return timeSinceLastPrompt >= oneDayMillis
+
+        return when (count) {
+            0 -> true
+            1 -> timeSinceLastPrompt >= oneWeekMillis
+            else -> timeSinceLastPrompt >= oneMonthMillis
+        }
     }
 
     fun markReviewPrompted() {
+        reviewPromptCount += 1
         lastReviewPromptTimestamp = System.currentTimeMillis()
     }
 
@@ -220,14 +235,17 @@ class PreferencesManager(context: Context) {
             val array = JSONArray(json)
             val list = mutableListOf<Station>()
             for (i in 0 until array.length()) {
-                val obj = array.getJSONObject(i)
+                val obj = array.optJSONObject(i) ?: continue
                 val pricesMap = mutableMapOf<String, Double>()
                 val pricesObj = obj.optJSONObject("prices")
                 if (pricesObj != null) {
                     val keys = pricesObj.keys()
                     while (keys.hasNext()) {
                         val k = keys.next()
-                        pricesMap[k] = pricesObj.getDouble(k)
+                        val pv = pricesObj.optDouble(k, Double.NaN)
+                        if (!pv.isNaN() && pv > 0) {
+                            pricesMap[k] = pv
+                        }
                     }
                 }
 
@@ -237,21 +255,27 @@ class PreferencesManager(context: Context) {
                     val dKeys = datesObj.keys()
                     while (dKeys.hasNext()) {
                         val dk = dKeys.next()
-                        datesMap[dk] = datesObj.getString(dk)
+                        val dv = datesObj.optString(dk, "")
+                        if (dv.isNotBlank()) datesMap[dk] = dv
                     }
                 }
 
+                val id = obj.optString("id", "")
+                val lat = obj.optDouble("lat", 0.0)
+                val lng = obj.optDouble("lng", 0.0)
+                if (id.isBlank() || lat == 0.0 || lng == 0.0) continue
+
                 list.add(
                     Station(
-                        id = obj.getString("id"),
-                        name = obj.getString("name"),
-                        brand = obj.getString("brand"),
-                        latitude = obj.getDouble("lat"),
-                        longitude = obj.getDouble("lng"),
-                        price = obj.getDouble("price"),
-                        fuel = obj.getString("fuel"),
-                        distanceMiles = obj.getDouble("dist"),
-                        updatedAt = obj.getString("updatedAt"),
+                        id = id,
+                        name = obj.optString("name", "Petrol Station"),
+                        brand = obj.optString("brand", "Independent"),
+                        latitude = lat,
+                        longitude = lng,
+                        price = obj.optDouble("price", 0.0),
+                        fuel = obj.optString("fuel", "E10"),
+                        distanceMiles = obj.optDouble("dist", 0.0),
+                        updatedAt = obj.optString("updatedAt", ""),
                         diffFromAvg = obj.optDouble("diffFromAvg", 0.0),
                         prices = pricesMap,
                         fuelUpdatedDates = datesMap,

@@ -149,7 +149,7 @@ fun FilterBottomSheet(
                         onClick = { selectedRadius = 5 },
                         modifier = Modifier
                             .weight(1f)
-                            .applePressEffect(scaleOnPress = 0.96f) { selectedRadius = 5 }
+                            .applePressEffect(scaleOnPress = 0.96f)
                     ) {
                         Text(
                             text = "Reset (5 mi)",

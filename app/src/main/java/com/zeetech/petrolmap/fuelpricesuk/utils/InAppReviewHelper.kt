@@ -44,7 +44,8 @@ object InAppReviewHelper {
                 }
             } else {
                 Log.e(TAG, "Failed requesting in-app review flow", request.exception)
-                prefs.markReviewPrompted() // Throttle for 24h to avoid spamming failed calls
+                // Throttle timestamp without consuming the prompt count tier
+                prefs.lastReviewPromptTimestamp = System.currentTimeMillis()
                 request.exception?.let { Firebase.crashlytics.recordException(it) }
             }
         }
@@ -54,7 +55,6 @@ object InAppReviewHelper {
      * Direct review trigger (e.g. user explicitly taps "Rate Us" in settings).
      */
     fun launchDirectReview(activity: Activity, prefs: PreferencesManager) {
-        prefs.markReviewPrompted()
         Firebase.analytics.logEvent("user_clicked_rate_us", null)
 
         val reviewManager: ReviewManager = ReviewManagerFactory.create(activity)
@@ -62,6 +62,7 @@ object InAppReviewHelper {
 
         requestTask.addOnCompleteListener { request ->
             if (request.isSuccessful) {
+                prefs.markUserRated()
                 val reviewInfo = request.result
                 reviewManager.launchReviewFlow(activity, reviewInfo)
                     .addOnFailureListener {
