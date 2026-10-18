@@ -38,7 +38,7 @@ fun PetrolMapFuelPricesUKTheme(
             if (window != null) {
                 if (android.os.Build.VERSION.SDK_INT < 35) {
                     @Suppress("DEPRECATION")
-                    window.statusBarColor = PetrolBackground.toArgb()
+                    window.statusBarColor = PetrolSurface.toArgb()
                     @Suppress("DEPRECATION")
                     window.navigationBarColor = PetrolSurface.toArgb()
                 }

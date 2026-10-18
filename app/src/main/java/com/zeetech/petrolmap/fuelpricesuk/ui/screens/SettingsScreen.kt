@@ -108,7 +108,6 @@ fun SettingsScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(PetrolBackground)
-            .statusBarsPadding()
             .padding(horizontal = 16.dp)
             .verticalScroll(rememberScrollState())
     ) {

@@ -48,6 +48,7 @@ import com.zeetech.petrolmap.fuelpricesuk.data.network.PetrolMapApiClient
 import com.zeetech.petrolmap.fuelpricesuk.data.network.StationsResult
 import com.zeetech.petrolmap.fuelpricesuk.ui.components.AppTab
 import com.zeetech.petrolmap.fuelpricesuk.ui.components.BottomNavBar
+import com.zeetech.petrolmap.fuelpricesuk.ui.components.TopHeaderBar
 import com.zeetech.petrolmap.fuelpricesuk.ui.screens.DirectionsDialog
 import com.zeetech.petrolmap.fuelpricesuk.ui.screens.FilterBottomSheet
 import com.zeetech.petrolmap.fuelpricesuk.ui.screens.FirstLaunchLocationScreen
@@ -89,11 +90,21 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+import com.zeetech.petrolmap.fuelpricesuk.ui.theme.PetrolSurface
+import androidx.compose.ui.graphics.toArgb
+
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        enableEdgeToEdge(
+            statusBarStyle = androidx.activity.SystemBarStyle.dark(
+                PetrolSurface.toArgb()
+            ),
+            navigationBarStyle = androidx.activity.SystemBarStyle.dark(
+                PetrolSurface.toArgb()
+            )
+        )
         setContent {
             PetrolMapFuelPricesUKTheme {
                 PetrolMapApp()
@@ -630,10 +641,34 @@ fun PetrolMapApp() {
         }
     }
 
-    // Main App Shell with Bottom Navigation Bar and In-App Update Snackbars
+    // Main App Shell with Persistent Top Header Bar, Bottom Navigation Bar, and In-App Update Snackbars
     Scaffold(
         modifier = Modifier.fillMaxSize(),
+        containerColor = PetrolSurface,
         snackbarHost = { SnackbarHost(snackbarHostState) },
+        topBar = {
+            TopHeaderBar(
+                locationTitle = locationTitle,
+                isOutsideUk = isOutsideUk,
+                isUserPinnedLocation = isUserPinnedLocation,
+                onClearPinnedLocation = {
+                    isUserPinnedLocation = false
+                    pinnedLat = null
+                    pinnedLng = null
+                    locationTitle = "Selected Area"
+                    fetchStations()
+                },
+                searchRadius = searchRadius,
+                onRadiusSelected = { r -> onRadiusChanged(r) },
+                selectedFuel = selectedFuel,
+                onFuelSelected = { fuel -> onFuelChanged(fuel) },
+                isRefreshing = isRefreshing,
+                onRefreshClick = { fetchStations(isRefresh = true) },
+                onSearchClick = { showSearchScreen = true },
+                isLocationDenied = isLocationDenied,
+                isOffline = isOffline
+            )
+        },
         bottomBar = {
             BottomNavBar(
                 currentTab = currentTab,
