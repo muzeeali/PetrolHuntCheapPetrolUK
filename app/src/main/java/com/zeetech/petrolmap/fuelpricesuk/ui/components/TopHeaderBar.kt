@@ -174,7 +174,7 @@ fun TopHeaderBar(
                             .background(PetrolSurfaceElevated)
                             .border(1.dp, PetrolBorder, RoundedCornerShape(10.dp))
                     ) {
-                        listOf(2, 5, 10, 15, 20).forEach { radius ->
+                        listOf(2, 5, 10, 15, 20, 25).forEach { radius ->
                             DropdownMenuItem(
                                 text = {
                                     Row(

@@ -53,7 +53,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -125,6 +127,12 @@ fun MainMapScreen(
     onMapLongClick: ((newLat: Double, newLng: Double) -> Unit)? = null
 ) {
     var isSheetExpanded by remember { mutableStateOf(false) }
+    var visibleStationsLimit by remember { mutableIntStateOf(15) }
+
+    // Reset pagination to initial top 15 when stations list, fuel, or radius changes
+    LaunchedEffect(stations, selectedFuel, searchRadius, sortMode) {
+        visibleStationsLimit = 15
+    }
 
     // Dynamic minimum and maximum prices computed strictly from active selected stations
     val selectedResultPrices = remember(stations) {
@@ -577,8 +585,8 @@ fun MainMapScreen(
                                     color = PetrolSecondaryText,
                                     fontSize = 11.5.sp
                                 )
-                                if (searchRadius < 50) {
-                                    val nextRadius = minOf(searchRadius + 5, 50)
+                                if (searchRadius < 25) {
+                                    val nextRadius = minOf(searchRadius + 5, 25)
                                     Spacer(modifier = Modifier.height(10.dp))
                                     Button(
                                         onClick = { onRadiusSelected(nextRadius) },
@@ -594,6 +602,8 @@ fun MainMapScreen(
                     }
                 } else {
                     val cheapestPrice = stations.minOfOrNull { it.price } ?: 0.0
+                    val pagedStations = stations.take(visibleStationsLimit)
+                    val remainingCount = stations.size - pagedStations.size
 
                     LazyColumn(
                         modifier = Modifier
@@ -601,13 +611,51 @@ fun MainMapScreen(
                             .weight(1f),
                         verticalArrangement = Arrangement.spacedBy(5.dp)
                     ) {
-                        items(stations) { station ->
+                        items(pagedStations, key = { it.id }) { station ->
                             StationCard(
                                 station = station,
                                 isCheapest = station.price <= cheapestPrice + 0.1,
                                 isSelected = selectedStation?.id == station.id,
                                 onClick = { onStationClick(station) }
                             )
+                        }
+
+                        // Load More Stations Button (reveals next 15 on tap)
+                        if (remainingCount > 0) {
+                            item {
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Button(
+                                    onClick = { visibleStationsLimit += 15 },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = PetrolSurfaceElevated,
+                                        contentColor = PetrolPrimaryText
+                                    ),
+                                    border = BorderStroke(1.dp, PetrolBorder),
+                                    shape = RoundedCornerShape(16.dp),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(42.dp)
+                                        .applePressEffect(scaleOnPress = 0.98f)
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.Center
+                                    ) {
+                                        Text(
+                                            text = "Load More Stations (+${minOf(15, remainingCount)})",
+                                            fontSize = 12.5.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = PetrolPrimaryText
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text(
+                                            text = "${pagedStations.size} of ${stations.size} shown",
+                                            fontSize = 11.sp,
+                                            color = PetrolSecondaryText
+                                        )
+                                    }
+                                }
+                            }
                         }
 
                         item {

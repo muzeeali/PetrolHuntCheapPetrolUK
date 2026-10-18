@@ -155,6 +155,7 @@ export default {
     normalizedUrl.searchParams.delete('_t');
     normalizedUrl.searchParams.delete('cb');
     normalizedUrl.searchParams.delete('timestamp');
+    normalizedUrl.searchParams.set('_v', 'cumulative_v1');
     const cacheKey = new Request(normalizedUrl.toString(), request);
 
     // If client is not requesting a force refresh, check edge cache
@@ -296,15 +297,37 @@ export default {
       else if (fuelParam === 'SDV' || fuelParam === 'PREMIUM_DIESEL') selectedFuelCode = 'SDV';
 
       try {
-        // Multi-point radial dispersion for extended radiuses (> 5 miles)
+        // Multi-point radial dispersion for comprehensive coverage across radii
         const queryPoints = [{ lat, lng }];
-        if (radiusParam > 5) {
-          const dLat = (radiusParam * 0.55) / 69.0;
-          const dLng = (radiusParam * 0.55) / (69.0 * Math.cos(lat * Math.PI / 180));
-          queryPoints.push({ lat: lat + dLat, lng: lng });
-          queryPoints.push({ lat: lat - dLat, lng: lng });
-          queryPoints.push({ lat: lat, lng: lng + dLng });
-          queryPoints.push({ lat: lat, lng: lng - dLng });
+        function addRing(rMiles, count) {
+          const dLatMiles = rMiles / 69.0;
+          const dLngMiles = rMiles / (69.0 * Math.cos(lat * Math.PI / 180));
+          for (let i = 0; i < count; i++) {
+            const theta = (i * 2 * Math.PI) / count;
+            queryPoints.push({
+              lat: lat + dLatMiles * Math.sin(theta),
+              lng: lng + dLngMiles * Math.cos(theta)
+            });
+          }
+        }
+
+        // Strict Additive Cumulative Probing:
+        // Every larger radius is an exact superset of all smaller radii probe points.
+        // This guarantees that stations(2) ⊆ stations(5) ⊆ stations(10) ⊆ stations(15) ⊆ stations(20) ⊆ stations(25).
+        if (radiusParam >= 5) {
+          addRing(3.5, 4);  // Ring 1: 4 points (~3.5 miles)
+        }
+        if (radiusParam >= 10) {
+          addRing(7.5, 6);  // Ring 2: 6 points (~7.5 miles)
+        }
+        if (radiusParam >= 15) {
+          addRing(12.0, 8); // Ring 3: 8 points (~12.0 miles)
+        }
+        if (radiusParam >= 20) {
+          addRing(17.0, 8); // Ring 4: 8 points (~17.0 miles)
+        }
+        if (radiusParam >= 25) {
+          addRing(22.0, 10); // Ring 5: 10 points (~22.0 miles)
         }
 
         const rawMap = new Map();

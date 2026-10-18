@@ -46,7 +46,7 @@ import com.zeetech.petrolmap.fuelpricesuk.ui.theme.PetrolSecondaryText
 import com.zeetech.petrolmap.fuelpricesuk.ui.theme.PetrolSurfaceElevated
 import com.zeetech.petrolmap.fuelpricesuk.ui.theme.applePressEffect
 
-val RADIUS_OPTIONS = listOf(1, 3, 5, 10, 15, 25, 50)
+val RADIUS_OPTIONS = listOf(2, 5, 10, 15, 20, 25)
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable

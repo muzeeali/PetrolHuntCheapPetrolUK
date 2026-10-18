@@ -22,8 +22,8 @@ class PreferencesManager(context: Context) {
         set(value) = prefs.edit().putString("fuel_type", value.name).apply()
 
     var searchRadius: Int
-        get() = prefs.getInt("search_radius", 5)
-        set(value) = prefs.edit().putInt("search_radius", value).apply()
+        get() = minOf(prefs.getInt("search_radius", 5), 25)
+        set(value) = prefs.edit().putInt("search_radius", minOf(value, 25)).apply()
 
     var sortMode: SortMode
         get() {

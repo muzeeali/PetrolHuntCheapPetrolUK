@@ -9,6 +9,7 @@ import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -46,6 +47,14 @@ object PetrolMapApiClient {
         .readTimeout(10, TimeUnit.SECONDS)
         .build()
 
+    // Solution 3: In-Memory Client Union Caching
+    // Guarantees monotonic station inclusion across radius expansion:
+    // stations(2) ⊆ stations(5) ⊆ stations(10) ⊆ stations(15) ⊆ stations(20) ⊆ stations(25)
+    private val sessionStationsCache = ConcurrentHashMap<String, Station>()
+    @Volatile private var cachedAnchorLat: Double? = null
+    @Volatile private var cachedAnchorLng: Double? = null
+    @Volatile private var cachedFuel: FuelType? = null
+
     suspend fun getNearbyStations(
         latitude: Double,
         longitude: Double,
@@ -58,6 +67,10 @@ object PetrolMapApiClient {
         // Check UK coordinates: latitude 49.5 to 61.5, longitude -9.5 to 2.5
         val inUk = latitude in 49.5..61.5 && longitude in -9.5..2.5
         if (!inUk) {
+            sessionStationsCache.clear()
+            cachedAnchorLat = null
+            cachedAnchorLng = null
+            cachedFuel = null
             return@withContext StationsResult.Success(
                 stations = emptyList(),
                 isCached = false,
@@ -68,6 +81,22 @@ object PetrolMapApiClient {
                 maxPrice = null,
                 avgPrice = null
             )
+        }
+
+        val anchorLat = cachedAnchorLat
+        val anchorLng = cachedAnchorLng
+        val distanceToAnchor = if (anchorLat != null && anchorLng != null) {
+            haversine(anchorLat, anchorLng, latitude, longitude)
+        } else {
+            Double.MAX_VALUE
+        }
+
+        // Reset session cache if force refresh requested, fuel type switched, or user moved beyond 25 miles
+        if (forceRefresh || cachedFuel != fuel || distanceToAnchor > 25.0) {
+            sessionStationsCache.clear()
+            cachedAnchorLat = latitude
+            cachedAnchorLng = longitude
+            cachedFuel = fuel
         }
 
         val refreshParam = if (forceRefresh) "&refresh=true" else ""
@@ -102,14 +131,58 @@ object PetrolMapApiClient {
                             )
                         }
 
-                        val stations = parseStationsArray(json.optJSONArray("stations"), fuel)
-                        val areaStats = json.optJSONObject("areaStats")
-                        val avgPrice = areaStats?.optDouble("avg")?.takeIf { !it.isNaN() }
-                        val minPrice = areaStats?.optDouble("min")?.takeIf { !it.isNaN() } ?: stations.minOfOrNull { it.price }
-                        val maxPrice = areaStats?.optDouble("max")?.takeIf { !it.isNaN() } ?: stations.maxOfOrNull { it.price }
+                        val incomingStations = parseStationsArray(json.optJSONArray("stations"), fuel)
+
+                        // Union merge: insert new stations and update existing entries with latest prices/timestamps
+                        for (st in incomingStations) {
+                            val key = if (st.slug.isNotBlank()) st.slug else "${st.latitude}_${st.longitude}"
+                            val existing = sessionStationsCache[key]
+                            if (existing == null) {
+                                sessionStationsCache[key] = st
+                            } else {
+                                val mergedPrices = existing.prices.toMutableMap().apply { putAll(st.prices) }
+                                val mergedDates = existing.fuelUpdatedDates.toMutableMap().apply { putAll(st.fuelUpdatedDates) }
+                                sessionStationsCache[key] = st.copy(
+                                    prices = mergedPrices,
+                                    fuelUpdatedDates = mergedDates
+                                )
+                            }
+                        }
+
+                        // Filter cumulative union cache for all stations strictly within the requested radius
+                        val candidateStations = sessionStationsCache.values.mapNotNull { st ->
+                            val dist = haversine(latitude, longitude, st.latitude, st.longitude)
+                            if (dist <= radiusMiles + 0.05) {
+                                st.copy(distanceMiles = Math.round(dist * 10.0) / 10.0)
+                            } else {
+                                null
+                            }
+                        }
+
+                        // Deterministic sorting matching requested SortMode
+                        val sortedStations = when (sort) {
+                            SortMode.CHEAPEST -> candidateStations.sortedWith(
+                                compareBy<Station> { it.price }.thenBy { it.distanceMiles }
+                            )
+                            SortMode.NEAREST -> candidateStations.sortedWith(
+                                compareBy<Station> { it.distanceMiles }.thenBy { it.price }
+                            )
+                            SortMode.LATEST -> candidateStations.sortedWith(
+                                compareByDescending<Station> { st ->
+                                    parseTimestampToEpoch(st.fuelUpdatedDates[fuel.code] ?: st.updatedAt)
+                                }.thenBy { it.price }
+                            )
+                        }
+
+                        val validPrices = sortedStations.map { it.price }.filter { it > 0.0 }
+                        val minPrice = validPrices.minOrNull()
+                        val maxPrice = validPrices.maxOrNull()
+                        val avgPrice = if (validPrices.isNotEmpty()) {
+                            Math.round((validPrices.sum() / validPrices.size) * 10.0) / 10.0
+                        } else null
 
                         return@withContext StationsResult.Success(
-                            stations = stations,
+                            stations = sortedStations,
                             isCached = isEdgeCached,
                             isUk = true,
                             attribution = json.optString("attribution", "Prices sourced via Fuel Finder & CMA Open Data Scheme"),
@@ -122,7 +195,43 @@ object PetrolMapApiClient {
                 }
             }
         } catch (_: Exception) {
-            // Worker network exception
+            // If network request failed but we have stations in session cache for this radius, serve them
+            if (sessionStationsCache.isNotEmpty()) {
+                val candidateStations = sessionStationsCache.values.mapNotNull { st ->
+                    val dist = haversine(latitude, longitude, st.latitude, st.longitude)
+                    if (dist <= radiusMiles + 0.05) {
+                        st.copy(distanceMiles = Math.round(dist * 10.0) / 10.0)
+                    } else {
+                        null
+                    }
+                }
+                if (candidateStations.isNotEmpty()) {
+                    val sortedStations = when (sort) {
+                        SortMode.CHEAPEST -> candidateStations.sortedWith(
+                            compareBy<Station> { it.price }.thenBy { it.distanceMiles }
+                        )
+                        SortMode.NEAREST -> candidateStations.sortedWith(
+                            compareBy<Station> { it.distanceMiles }.thenBy { it.price }
+                        )
+                        SortMode.LATEST -> candidateStations.sortedWith(
+                            compareByDescending<Station> { st ->
+                                parseTimestampToEpoch(st.fuelUpdatedDates[fuel.code] ?: st.updatedAt)
+                            }.thenBy { it.price }
+                        )
+                    }
+                    val validPrices = sortedStations.map { it.price }.filter { it > 0.0 }
+                    return@withContext StationsResult.Success(
+                        stations = sortedStations,
+                        isCached = true,
+                        isUk = true,
+                        attribution = "Prices sourced via Fuel Finder & CMA Open Data Scheme",
+                        fetchedAt = "",
+                        minPrice = validPrices.minOrNull(),
+                        maxPrice = validPrices.maxOrNull(),
+                        avgPrice = if (validPrices.isNotEmpty()) Math.round((validPrices.sum() / validPrices.size) * 10.0) / 10.0 else null
+                    )
+                }
+            }
         }
 
         StationsResult.Error(

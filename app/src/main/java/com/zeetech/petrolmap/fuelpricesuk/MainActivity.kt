@@ -254,7 +254,8 @@ fun PetrolMapApp() {
                 longitude = queryLng,
                 fuel = selectedFuel,
                 radiusMiles = searchRadius,
-                sort = sortMode
+                sort = sortMode,
+                forceRefresh = isRefresh
             )
 
             when (result) {
