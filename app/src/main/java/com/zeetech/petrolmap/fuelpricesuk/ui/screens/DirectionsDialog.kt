@@ -21,6 +21,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Directions
 import androidx.compose.material.icons.filled.Navigation
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.RadioButton
@@ -28,6 +30,10 @@ import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,6 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.zeetech.petrolmap.fuelpricesuk.data.location.NavigationHelper
 import com.zeetech.petrolmap.fuelpricesuk.data.model.NavigationApp
 import com.zeetech.petrolmap.fuelpricesuk.data.model.Station
 import com.zeetech.petrolmap.fuelpricesuk.ui.theme.PetrolBackground
@@ -50,10 +57,14 @@ import com.zeetech.petrolmap.fuelpricesuk.ui.theme.PetrolSurfaceElevated
 fun DirectionsDialog(
     station: Station,
     selectedNavApp: NavigationApp,
+    rememberChoiceInitial: Boolean = false,
     onNavAppChanged: (NavigationApp) -> Unit,
+    onRememberChoiceChanged: (Boolean) -> Unit = {},
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
+    val installedApps = remember(context) { NavigationHelper.getInstalledNavigationApps(context) }
+    var rememberChoice by remember { mutableStateOf(rememberChoiceInitial) }
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
@@ -112,7 +123,7 @@ fun DirectionsDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                NavigationApp.entries.forEach { app ->
+                installedApps.forEach { app ->
                     val isSelected = app == selectedNavApp
 
                     Row(
@@ -124,6 +135,7 @@ fun DirectionsDialog(
                             .border(1.dp, if (isSelected) PetrolBrandGreen else PetrolBorder, RoundedCornerShape(12.dp))
                             .clickable {
                                 onNavAppChanged(app)
+                                onRememberChoiceChanged(rememberChoice)
                                 launchNavigation(context, station, app)
                                 onDismiss()
                             }
@@ -134,6 +146,7 @@ fun DirectionsDialog(
                             selected = isSelected,
                             onClick = {
                                 onNavAppChanged(app)
+                                onRememberChoiceChanged(rememberChoice)
                                 launchNavigation(context, station, app)
                                 onDismiss()
                             },
@@ -170,6 +183,33 @@ fun DirectionsDialog(
                             modifier = Modifier.size(18.dp)
                         )
                     }
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable { rememberChoice = !rememberChoice }
+                        .padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(
+                        checked = rememberChoice,
+                        onCheckedChange = { rememberChoice = it },
+                        colors = CheckboxDefaults.colors(
+                            checkedColor = PetrolBrandGreen,
+                            uncheckedColor = PetrolMutedText,
+                            checkmarkColor = PetrolBackground
+                        )
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Remember my choice (don't ask again)",
+                        color = PetrolSecondaryText,
+                        fontSize = 12.sp
+                    )
                 }
             }
         }

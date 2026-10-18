@@ -51,13 +51,17 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.zeetech.petrolmap.fuelpricesuk.data.location.NavigationHelper
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -264,6 +268,15 @@ fun SettingsScreen(
         // SECTION B: NAVIGATION
         SectionHeader(icon = Icons.Default.DirectionsCar, title = "NAVIGATION")
 
+        val installedNavApps = remember(context) { NavigationHelper.getInstalledNavigationApps(context) }
+        var rememberChoice by remember { mutableStateOf(effectivePrefs.rememberNavigationAppChoice) }
+
+        LaunchedEffect(installedNavApps) {
+            if (currentNavApp !in installedNavApps && installedNavApps.isNotEmpty()) {
+                onNavAppChanged(installedNavApps.first())
+            }
+        }
+
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = PetrolSurfaceElevated),
@@ -281,7 +294,7 @@ fun SettingsScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    NavigationApp.entries.forEach { app ->
+                    installedNavApps.forEach { app ->
                         val isSelected = app == currentNavApp
                         Box(
                             modifier = Modifier
@@ -295,7 +308,7 @@ fun SettingsScreen(
                         ) {
                             Text(
                                 text = when (app) {
-                                    NavigationApp.SYSTEM_DEFAULT -> "Default"
+                                    NavigationApp.SYSTEM_DEFAULT -> "System Default"
                                     NavigationApp.GOOGLE_MAPS -> "Google Maps"
                                     NavigationApp.WAZE -> "Waze"
                                 },
@@ -305,6 +318,53 @@ fun SettingsScreen(
                             )
                         }
                     }
+                }
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(10.dp))
+                        .clickable {
+                            val newVal = !rememberChoice
+                            rememberChoice = newVal
+                            effectivePrefs.rememberNavigationAppChoice = newVal
+                        }
+                        .padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Direct 1-Tap Navigation",
+                            color = PetrolPrimaryText,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = if (rememberChoice)
+                                "Opens ${currentNavApp.label} directly without asking"
+                            else
+                                "Prompt with available map choices each time",
+                            color = PetrolMutedText,
+                            fontSize = 11.sp
+                        )
+                    }
+
+                    Switch(
+                        checked = rememberChoice,
+                        onCheckedChange = { newVal ->
+                            rememberChoice = newVal
+                            effectivePrefs.rememberNavigationAppChoice = newVal
+                        },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = PetrolBackground,
+                            checkedTrackColor = PetrolBrandGreen,
+                            uncheckedThumbColor = PetrolMutedText,
+                            uncheckedTrackColor = PetrolSurface
+                        )
+                    )
                 }
             }
         }

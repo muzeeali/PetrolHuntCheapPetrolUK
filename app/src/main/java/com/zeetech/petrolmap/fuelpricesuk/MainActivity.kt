@@ -50,7 +50,9 @@ import com.zeetech.petrolmap.fuelpricesuk.data.network.StationsResult
 import com.zeetech.petrolmap.fuelpricesuk.ui.components.AppTab
 import com.zeetech.petrolmap.fuelpricesuk.ui.components.BottomNavBar
 import com.zeetech.petrolmap.fuelpricesuk.ui.components.TopHeaderBar
+import com.zeetech.petrolmap.fuelpricesuk.data.location.NavigationHelper
 import com.zeetech.petrolmap.fuelpricesuk.ui.screens.DirectionsDialog
+import com.zeetech.petrolmap.fuelpricesuk.ui.screens.launchNavigation
 import com.zeetech.petrolmap.fuelpricesuk.ui.screens.FilterBottomSheet
 import com.zeetech.petrolmap.fuelpricesuk.ui.screens.FirstLaunchLocationScreen
 import com.zeetech.petrolmap.fuelpricesuk.ui.screens.FuelBottomSheet
@@ -197,6 +199,15 @@ fun PetrolMapApp() {
     var showStationDetails by remember { mutableStateOf(false) }
     var showDirectionsDialog by remember { mutableStateOf(false) }
     var stationForDirections by remember { mutableStateOf<Station?>(null) }
+
+    val handleOpenDirections: (Station) -> Unit = { st ->
+        if (prefs.rememberNavigationAppChoice && NavigationHelper.isAppInstalled(context, prefs.navigationApp)) {
+            launchNavigation(context, st, prefs.navigationApp)
+        } else {
+            stationForDirections = st
+            showDirectionsDialog = true
+        }
+    }
 
     var recentSearches by remember { mutableStateOf(prefs.getRecentSearches()) }
 
@@ -826,8 +837,7 @@ fun PetrolMapApp() {
                             requestGpsWithPermissionPrompt()
                         },
                         onOpenDirections = { st ->
-                            stationForDirections = st
-                            showDirectionsDialog = true
+                            handleOpenDirections(st)
                         },
                         onJumpToUk = {
                             isUserPinnedLocation = false
@@ -971,8 +981,7 @@ fun PetrolMapApp() {
             searchRadius = searchRadius,
             onDismiss = { showStationDetails = false },
             onGetDirections = { st ->
-                stationForDirections = st
-                showDirectionsDialog = true
+                handleOpenDirections(st)
             },
             onViewOnMap = { st ->
                 centerLat = st.latitude
@@ -987,9 +996,13 @@ fun PetrolMapApp() {
         DirectionsDialog(
             station = stationForDirections!!,
             selectedNavApp = navigationApp,
+            rememberChoiceInitial = prefs.rememberNavigationAppChoice,
             onNavAppChanged = { app ->
                 navigationApp = app
                 prefs.navigationApp = app
+            },
+            onRememberChoiceChanged = { remember ->
+                prefs.rememberNavigationAppChoice = remember
             },
             onDismiss = {
                 showDirectionsDialog = false

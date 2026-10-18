@@ -25,6 +25,7 @@ import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.zeetech.petrolmap.fuelpricesuk.data.local.PreferencesManager
+import com.zeetech.petrolmap.fuelpricesuk.data.model.NavigationApp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -287,3 +288,38 @@ object LocationHelper {
         freshLocation ?: bestLastKnown
     }
 }
+
+object NavigationHelper {
+
+    fun isPackageInstalled(context: Context, packageName: String): Boolean {
+        return try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                context.packageManager.getPackageInfo(
+                    packageName,
+                    PackageManager.PackageInfoFlags.of(0)
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                context.packageManager.getPackageInfo(packageName, 0)
+            }
+            true
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    fun isAppInstalled(context: Context, app: NavigationApp): Boolean {
+        val pkg = app.packageName ?: return true
+        return isPackageInstalled(context, pkg)
+    }
+
+    fun getInstalledNavigationApps(context: Context): List<NavigationApp> {
+        val installed = NavigationApp.entries.filter { isAppInstalled(context, it) }
+        return if (installed.isEmpty()) {
+            listOf(NavigationApp.SYSTEM_DEFAULT)
+        } else {
+            installed
+        }
+    }
+}
+

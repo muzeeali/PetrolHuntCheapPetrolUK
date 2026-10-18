@@ -39,6 +39,10 @@ class PreferencesManager(context: Context) {
         }
         set(value) = prefs.edit().putString("nav_app", value.name).apply()
 
+    var rememberNavigationAppChoice: Boolean
+        get() = prefs.getBoolean("remember_nav_app_choice", false)
+        set(value) = prefs.edit().putBoolean("remember_nav_app_choice", value).apply()
+
     var hasPromptedLocation: Boolean
         get() = prefs.getBoolean("has_prompted_location", false)
         set(value) = prefs.edit().putBoolean("has_prompted_location", value).apply()
