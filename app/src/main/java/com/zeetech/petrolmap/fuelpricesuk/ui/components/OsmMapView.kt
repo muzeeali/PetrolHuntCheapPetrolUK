@@ -57,6 +57,13 @@ fun OsmMapView(
     val lastHandledTrigger = remember { intArrayOf(recenterTrigger) }
 
     var isUserInteracting by remember { mutableStateOf(false) }
+    var lastRenderedStations by remember { mutableStateOf<List<Station>?>(null) }
+    var lastRenderedSelectedStationId by remember { mutableStateOf<String?>(null) }
+    var lastRenderedUserLat by remember { mutableStateOf<Double?>(null) }
+    var lastRenderedUserLng by remember { mutableStateOf<Double?>(null) }
+    var lastRenderedIsPinned by remember { mutableStateOf(false) }
+    var lastRenderedPinnedLat by remember { mutableStateOf<Double?>(null) }
+    var lastRenderedPinnedLng by remember { mutableStateOf<Double?>(null) }
 
     val currentOnMapMoved by rememberUpdatedState(onMapMoved)
     val currentOnMapReady by rememberUpdatedState(onMapReady)
@@ -132,94 +139,130 @@ fun OsmMapView(
                 }
             }
 
-            // Clear old markers
-            map.overlays.clear()
+            // Only update overlays when data has meaningfully changed
+            val stationsChanged = stations != lastRenderedStations || selectedStation?.id != lastRenderedSelectedStationId
+            val userLocChanged = userLat != lastRenderedUserLat || userLng != lastRenderedUserLng
+            val pinChanged = isPinnedLocation != lastRenderedIsPinned || pinnedLat != lastRenderedPinnedLat || pinnedLng != lastRenderedPinnedLng
 
-            // 0. Long Press Event Listener Overlay
-            if (onMapLongClick != null) {
-                val eventsOverlay = MapEventsOverlay(object : MapEventsReceiver {
-                    override fun singleTapConfirmedHelper(p: org.osmdroid.util.GeoPoint?): Boolean {
-                        return false
-                    }
+            if (stationsChanged || userLocChanged || pinChanged) {
+                lastRenderedStations = stations
+                lastRenderedSelectedStationId = selectedStation?.id
+                lastRenderedUserLat = userLat
+                lastRenderedUserLng = userLng
+                lastRenderedIsPinned = isPinnedLocation
+                lastRenderedPinnedLat = pinnedLat
+                lastRenderedPinnedLng = pinnedLng
 
-                    override fun longPressHelper(p: org.osmdroid.util.GeoPoint?): Boolean {
-                        if (p != null) {
-                            onMapLongClick.invoke(p.latitude, p.longitude)
-                            return true
+                map.overlays.clear()
+
+                // 0. Long Press Event Listener Overlay
+                if (onMapLongClick != null) {
+                    val eventsOverlay = MapEventsOverlay(object : MapEventsReceiver {
+                        override fun singleTapConfirmedHelper(p: org.osmdroid.util.GeoPoint?): Boolean = false
+                        override fun longPressHelper(p: org.osmdroid.util.GeoPoint?): Boolean {
+                            if (p != null) {
+                                onMapLongClick.invoke(p.latitude, p.longitude)
+                                return true
+                            }
+                            return false
                         }
-                        return false
+                    })
+                    map.overlays.add(eventsOverlay)
+                }
+
+                // 1. User location marker
+                if (userLat != null && userLng != null) {
+                    val userMarker = Marker(map).apply {
+                        position = GeoPoint(userLat, userLng)
+                        title = "My Location"
+                        icon = getCachedUserLocationIcon(context)
+                        setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
                     }
-                })
-                map.overlays.add(eventsOverlay)
-            }
-
-            // 1. User location marker
-            if (userLat != null && userLng != null) {
-                val userMarker = Marker(map).apply {
-                    position = GeoPoint(userLat, userLng)
-                    title = "My Location"
-                    icon = createUserLocationIcon(context)
-                    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-                }
-                map.overlays.add(userMarker)
-            }
-
-            // 2. Pinned / Searched Location Marker
-            if (isPinnedLocation && pinnedLat != null && pinnedLng != null) {
-                val pinMarker = Marker(map).apply {
-                    position = GeoPoint(pinnedLat, pinnedLng)
-                    title = pinnedTitle ?: "Pinned Location"
-                    icon = createPinnedLocationIcon(context)
-                    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                }
-                map.overlays.add(pinMarker)
-            }
-
-            // 2. Station Price Markers
-            val cheapestPrice = stations.minOfOrNull { it.price } ?: 0.0
-            val highestPrice = stations.maxOfOrNull { it.price } ?: 0.0
-
-            for (station in stations) {
-                val isSelected = selectedStation?.id == station.id
-                val isCheapest = station.price <= cheapestPrice + 0.1
-
-                val markerColor = when {
-                    isCheapest -> 0xFF35E879.toInt() // Green
-                    station.price >= highestPrice - 1.0 -> 0xFFFF5C5C.toInt() // Red
-                    else -> 0xFFFFC857.toInt() // Amber
+                    map.overlays.add(userMarker)
                 }
 
-                val marker = Marker(map).apply {
-                    position = GeoPoint(station.latitude, station.longitude)
-                    title = station.name
-                    subDescription = "${station.price}p"
-                    icon = createPriceMarkerIcon(
-                        context = context,
-                        priceText = String.format("%.1fp", station.price),
-                        color = markerColor,
-                        isSelected = isSelected,
-                        isCheapest = isCheapest
-                    )
-                    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                    setOnMarkerClickListener { _, _ ->
-                        onStationClick(station)
-                        true
+                // 2. Pinned / Searched Location Marker
+                if (isPinnedLocation && pinnedLat != null && pinnedLng != null) {
+                    val pinMarker = Marker(map).apply {
+                        position = GeoPoint(pinnedLat, pinnedLng)
+                        title = pinnedTitle ?: "Pinned Location"
+                        icon = getCachedPinnedLocationIcon(context)
+                        setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                     }
+                    map.overlays.add(pinMarker)
                 }
-                map.overlays.add(marker)
-            }
 
-            map.invalidate()
+                // 3. Station Price Markers
+                val cheapestPrice = stations.minOfOrNull { it.price } ?: 0.0
+                val highestPrice = stations.maxOfOrNull { it.price } ?: 0.0
+
+                for (station in stations) {
+                    val isSelected = selectedStation?.id == station.id
+                    val isCheapest = station.price <= cheapestPrice + 0.1
+
+                    val markerColor = when {
+                        isCheapest -> 0xFF35E879.toInt() // Green
+                        station.price >= highestPrice - 1.0 -> 0xFFFF5C5C.toInt() // Red
+                        else -> 0xFFFFC857.toInt() // Amber
+                    }
+
+                    val marker = Marker(map).apply {
+                        position = GeoPoint(station.latitude, station.longitude)
+                        title = station.name
+                        subDescription = "${station.price}p"
+                        icon = getOrCreatePriceMarkerIcon(
+                            context = context,
+                            priceText = String.format(java.util.Locale.US, "%.1fp", station.price),
+                            color = markerColor,
+                            isSelected = isSelected
+                        )
+                        setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                        setOnMarkerClickListener { _, _ ->
+                            onStationClick(station)
+                            true
+                        }
+                    }
+                    map.overlays.add(marker)
+                }
+
+                map.invalidate()
+            }
         }
     )
+}
+
+// Memory-efficient LRU cache for marker icon bitmaps (prevents UI thread allocations & ANRs)
+private val priceMarkerIconCache = android.util.LruCache<String, BitmapDrawable>(96)
+private var cachedUserLocationIcon: BitmapDrawable? = null
+private var cachedPinnedLocationIcon: BitmapDrawable? = null
+
+private fun getCachedUserLocationIcon(context: Context): BitmapDrawable {
+    return cachedUserLocationIcon ?: createUserLocationIcon(context).also { cachedUserLocationIcon = it }
+}
+
+private fun getCachedPinnedLocationIcon(context: Context): BitmapDrawable {
+    return cachedPinnedLocationIcon ?: createPinnedLocationIcon(context).also { cachedPinnedLocationIcon = it }
+}
+
+private fun getOrCreatePriceMarkerIcon(
+    context: Context,
+    priceText: String,
+    color: Int,
+    isSelected: Boolean
+): BitmapDrawable {
+    val key = "$priceText-$color-$isSelected"
+    priceMarkerIconCache.get(key)?.let { return it }
+
+    val icon = createPriceMarkerIcon(context, priceText, color, isSelected)
+    priceMarkerIconCache.put(key, icon)
+    return icon
 }
 
 private fun createPriceMarkerIcon(
     context: Context,
     priceText: String,
     color: Int,
-    isSelected: Boolean,
-    isCheapest: Boolean
+    isSelected: Boolean
 ): BitmapDrawable {
     val density = context.resources.displayMetrics.density
     val width = (if (isSelected) 84 * density else 72 * density).toInt()

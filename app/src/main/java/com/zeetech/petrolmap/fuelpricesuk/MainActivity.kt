@@ -58,6 +58,8 @@ import com.zeetech.petrolmap.fuelpricesuk.ui.screens.FirstLaunchLocationScreen
 import com.zeetech.petrolmap.fuelpricesuk.ui.screens.FuelBottomSheet
 import com.zeetech.petrolmap.fuelpricesuk.ui.screens.MainMapScreen
 import com.zeetech.petrolmap.fuelpricesuk.ui.screens.SearchScreen
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import com.zeetech.petrolmap.fuelpricesuk.ui.screens.SettingsScreen
 import com.zeetech.petrolmap.fuelpricesuk.ui.screens.SortBottomSheet
 import com.zeetech.petrolmap.fuelpricesuk.ui.screens.StationDetailDialog
@@ -265,7 +267,9 @@ fun PetrolMapApp() {
                     isOffline = false
                     if (result.isUk) {
                         lastUpdatedTime = result.fetchedAt
-                        prefs.saveCachedStations(result.stations, result.fetchedAt)
+                        withContext(Dispatchers.IO) {
+                            prefs.saveCachedStations(result.stations, result.fetchedAt)
+                        }
                     }
                     try {
                         Firebase.analytics.logEvent("search_fuel_stations") {
@@ -281,10 +285,12 @@ fun PetrolMapApp() {
                         Firebase.crashlytics.log("Fetch stations failed: ${result.message}")
                     } catch (e: Exception) {}
                     // Fall back to offline cached stations if available
-                    val cached = prefs.getCachedStations()
+                    val cached: List<Station> = withContext(Dispatchers.IO) {
+                        prefs.getCachedStations()
+                    }
                     if (cached.isNotEmpty()) {
                         stations = sortStations(cached, sortMode, selectedFuel)
-                        val validPrices = cached.map { it.price }.filter { it > 0.0 }
+                        val validPrices = cached.map { s: Station -> s.price }.filter { p: Double -> p > 0.0 }
                         minPrice = validPrices.minOrNull()
                         maxPrice = validPrices.maxOrNull()
                     }

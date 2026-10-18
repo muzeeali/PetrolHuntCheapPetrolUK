@@ -164,7 +164,7 @@ object LocationHelper {
     }
 
     @SuppressLint("MissingPermission")
-    suspend fun getCurrentLocation(context: Context): Location? = withContext(Dispatchers.Main) {
+    suspend fun getCurrentLocation(context: Context): Location? = withContext(Dispatchers.IO) {
         if (!hasLocationPermission(context)) return@withContext null
 
         val lm = context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
