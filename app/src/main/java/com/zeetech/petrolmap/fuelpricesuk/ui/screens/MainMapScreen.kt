@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -128,10 +129,18 @@ fun MainMapScreen(
 ) {
     var isSheetExpanded by remember { mutableStateOf(false) }
     var visibleStationsLimit by remember { mutableIntStateOf(15) }
+    val listState = rememberLazyListState()
 
-    // Reset pagination to initial top 15 when stations list, fuel, or radius changes
-    LaunchedEffect(stations, selectedFuel, searchRadius, sortMode) {
+    // Reset pagination to initial top 15 and ensure scroll strictly remains at top on sort change
+    LaunchedEffect(sortMode) {
         visibleStationsLimit = 15
+        listState.scrollToItem(0)
+    }
+
+    // Reset pagination and scroll when fuel type or distance radius changes
+    LaunchedEffect(selectedFuel, searchRadius) {
+        visibleStationsLimit = 15
+        listState.scrollToItem(0)
     }
 
     // Dynamic minimum and maximum prices computed strictly from active selected stations
@@ -606,12 +615,13 @@ fun MainMapScreen(
                     val remainingCount = stations.size - pagedStations.size
 
                     LazyColumn(
+                        state = listState,
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(1f),
                         verticalArrangement = Arrangement.spacedBy(5.dp)
                     ) {
-                        items(pagedStations, key = { it.id }) { station ->
+                        items(pagedStations, key = { "${sortMode.name}_${it.id}" }) { station ->
                             StationCard(
                                 station = station,
                                 isCheapest = station.price <= cheapestPrice + 0.1,

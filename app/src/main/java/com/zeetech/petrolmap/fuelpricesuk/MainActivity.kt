@@ -633,7 +633,9 @@ fun PetrolMapApp() {
         sortMode = newSort
         prefs.sortMode = newSort
         stations = sortStations(stations, newSort, selectedFuel)
-        fetchStations(isRefresh = true)
+        if (stations.isEmpty()) {
+            fetchStations()
+        }
     }
 
     // First Launch Screen
