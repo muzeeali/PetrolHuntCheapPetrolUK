@@ -36,12 +36,6 @@ fun PetrolMapFuelPricesUKTheme(
         SideEffect {
             val window = (view.context as? Activity)?.window
             if (window != null) {
-                if (android.os.Build.VERSION.SDK_INT < 35) {
-                    @Suppress("DEPRECATION")
-                    window.statusBarColor = PetrolSurface.toArgb()
-                    @Suppress("DEPRECATION")
-                    window.navigationBarColor = PetrolSurface.toArgb()
-                }
                 val controller = WindowCompat.getInsetsController(window, view)
                 controller.isAppearanceLightStatusBars = false
                 controller.isAppearanceLightNavigationBars = false

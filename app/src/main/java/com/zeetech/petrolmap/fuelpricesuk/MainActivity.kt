@@ -102,14 +102,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge(
-            statusBarStyle = androidx.activity.SystemBarStyle.dark(
-                PetrolSurface.toArgb()
-            ),
-            navigationBarStyle = androidx.activity.SystemBarStyle.dark(
-                PetrolSurface.toArgb()
-            )
-        )
+        enableEdgeToEdge()
         setContent {
             PetrolMapFuelPricesUKTheme {
                 PetrolMapApp()

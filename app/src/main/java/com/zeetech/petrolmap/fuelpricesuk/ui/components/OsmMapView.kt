@@ -70,6 +70,7 @@ fun OsmMapView(
 
     val mapView = remember {
         Configuration.getInstance().userAgentValue = context.packageName
+        Configuration.getInstance().cacheMapTileCount = 12.toShort()
         Configuration.getInstance().tileFileSystemCacheMaxBytes = 100L * 1024 * 1024 // 100 MB max
         Configuration.getInstance().tileFileSystemCacheTrimBytes = 80L * 1024 * 1024 // trim to 80 MB
         MapView(context).apply {
